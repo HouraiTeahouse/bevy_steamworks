@@ -1,12 +1,20 @@
 [package]
 name = "bevy-steamworks"
-version = "0.1.0"
+version = "0.1.1"
 authors = ["james7132 <contact@jamessliu.com>"]
 edition = "2018"
 description = "A Bevy plugin for integrating with the Steamworks SDK."
 repository = "https://github.com/james7132/bevy-steamworks"
 license = "MIT"
 keywords = ["bevy", "gamedev", "steam"]
+
+[package.metadata.docs.rs]
+features = [ "docs-only" ]
+
+[features]
+default = []
+# Skip looking for the steamworks sdk for docs builds
+docs-only = ["steamworks/docs-only"]
 
 [dependencies]
 bevy_log = "0.5"
