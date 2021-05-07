@@ -2,7 +2,7 @@
 
 [![crates.io](https://img.shields.io/crates/v/bevy-steamworks.svg)](https://crates.io/crates/bevy-steamworks)
 [![Documentation](https://docs.rs/bevy-steamworks/badge.svg)](https://docs.rs/bevy-steamworks)
-[![License](https://img.shields.io/crates/l/bevy-steamworks.svg)
+![License](https://img.shields.io/crates/l/bevy-steamworks.svg)
 
 This crate provides a [Bevy](https://bevyengine.org/) plugin for integrating with
 the Steamworks SDK via the steamworks crate.
