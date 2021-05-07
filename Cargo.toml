@@ -1,0 +1,15 @@
+[package]
+name = "bevy-steamworks"
+version = "0.1.0"
+authors = ["james7132 <contact@jamessliu.com>"]
+edition = "2018"
+description = "A Bevy plugin for integrating with the Steamworks SDK."
+repository = "https://github.com/james7132/bevy-steamworks"
+license = "MIT"
+keywords = ["bevy", "gamedev", "steam"]
+
+[dependencies]
+bevy_log = "0.5"
+bevy_app = "0.5"
+bevy_ecs = "0.5"
+steamworks = "0.7"
