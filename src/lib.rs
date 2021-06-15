@@ -1,5 +1,3 @@
-//! !
-//!
 //! This crate provides a [Bevy](https://bevyengine.org/) plugin for integrating with
 //! the Steamworks SDK.
 //!
@@ -68,13 +66,15 @@
 //! }
 //! ```
 
-use bevy_app::{AppBuilder, Plugin};
-use bevy_ecs::system::{IntoSystem, NonSend};
+use bevy_app::{AppBuilder, EventWriter, Plugin};
+use bevy_ecs::{schedule::*, system::*};
 use bevy_log::error;
+use std::sync::{Arc, Mutex};
 pub use steamworks::*;
 
-fn run_steam_callbacks(client: NonSend<SingleClient>) {
-    client.run_callbacks();
+struct SteamEvents<T> {
+    _callback: CallbackHandle,
+    pending: Arc<Mutex<Vec<T>>>,
 }
 
 pub struct SteamworksPlugin;
@@ -87,10 +87,52 @@ impl Plugin for SteamworksPlugin {
         match Client::init() {
             Err(err) => error!("Failed to initialize Steamworks client: {}", err),
             Ok((client, single)) => {
-                app.insert_resource(client)
+                app.insert_resource(client.clone())
                     .insert_non_send_resource(single)
-                    .add_system(run_steam_callbacks.system());
+                    .add_system(run_steam_callbacks.system().label(STEAM_CALLBACKS));
+
+                add_event::<AuthSessionTicketResponse>(app, &client);
+                add_event::<GameLobbyJoinRequested>(app, &client);
+                add_event::<P2PSessionConnectFail>(app, &client);
+                add_event::<P2PSessionRequest>(app, &client);
+                add_event::<PersonaStateChange>(app, &client);
+                add_event::<UserAchievementStored>(app, &client);
+                add_event::<UserStatsReceived>(app, &client);
+                add_event::<UserStatsStored>(app, &client);
+                add_event::<ValidateAuthTicketResponse>(app, &client);
             }
         }
     }
+}
+
+const STEAM_CALLBACKS: &str = "run_steam_callbacks";
+
+fn run_steam_callbacks(client: NonSend<SingleClient>) {
+    client.run_callbacks();
+}
+
+fn flush_events<T: Send + Sync + 'static>(
+    events: ResMut<SteamEvents<T>>,
+    mut output: EventWriter<T>,
+) {
+    let mut pending = events.pending.lock().unwrap();
+    output.send_batch(pending.drain(0..));
+}
+
+fn add_event<T: Callback + Send + Sync + 'static>(
+    app: &mut AppBuilder,
+    client: &Client<ClientManager>,
+) {
+    let pending = Arc::new(Mutex::new(Vec::new()));
+    let pending_in = pending.clone();
+    let callback = client.register_callback::<T, _>(move |evt| {
+        pending_in.lock().unwrap().push(evt);
+    });
+    let events = SteamEvents::<T> {
+        _callback: callback,
+        pending,
+    };
+    app.add_event::<T>()
+        .insert_resource(events)
+        .add_system(flush_events::<T>.system().after(STEAM_CALLBACKS));
 }
