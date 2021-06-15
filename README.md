@@ -69,3 +69,30 @@ fn main() {
       .run()
 }
 ```
+
+### Events/Callbacks
+
+All of the callback based events sent by Steam's SDK will be forwarded to Bevy
+and can be read via a `EventReader` system param.
+
+```rust
+use bevy_steamworks::{Client, P2PSessionRequest};
+
+fn handle_p2p_session_requests(
+  steam_client: Res<Client>,
+  requests: EventReader<P2PSessionRequest>
+) {
+  for request in requests.iter() {
+    println!("P2P Session Request from: {:?}", request.remote);
+    steam_client.networking().accept_p2p_session(request.remote);
+  }
+}
+
+fn main() {
+  App::build()
+      .add_plugins(DefaultPlugins)
+      .add_plugin(SteamworksPlugin)
+      .add_system(handle_p2p_session_requests.system())
+      .run()
+}
+```
