@@ -81,6 +81,9 @@ pub struct SteamworksPlugin;
 
 impl Plugin for SteamworksPlugin {
     fn build(&self, app: &mut AppBuilder) {
+        if app.world().contains_resource::<Client<ClientManager>>() {
+            return;
+        }
         match Client::init() {
             Err(err) => error!("Failed to initialize Steamworks client: {}", err),
             Ok((client, single)) => {
