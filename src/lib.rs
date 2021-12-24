@@ -22,7 +22,7 @@
 //! ## Usage
 //!
 //! To add the plugin to your game, simply add the `SteamworksPlugin` to your
-//! `AppBuilder`.
+//! `App`.
 //!
 //! ```rust
 //! use bevy::prelude::*;
@@ -66,7 +66,7 @@
 //! }
 //! ```
 
-use bevy_app::{AppBuilder, EventWriter, Plugin};
+use bevy_app::{App, EventWriter, Plugin};
 use bevy_ecs::{schedule::*, system::*};
 use bevy_log::error;
 use std::sync::{Arc, Mutex};
@@ -80,8 +80,8 @@ struct SteamEvents<T> {
 pub struct SteamworksPlugin;
 
 impl Plugin for SteamworksPlugin {
-    fn build(&self, app: &mut AppBuilder) {
-        if app.world().contains_resource::<Client<ClientManager>>() {
+    fn build(&self, app: &mut App) {
+        if app.world.contains_resource::<Client<ClientManager>>() {
             return;
         }
         match Client::init() {
@@ -120,7 +120,7 @@ fn flush_events<T: Send + Sync + 'static>(
 }
 
 fn add_event<T: Callback + Send + Sync + 'static>(
-    app: &mut AppBuilder,
+    app: &mut App,
     client: &Client<ClientManager>,
 ) {
     let pending = Arc::new(Mutex::new(Vec::new()));
