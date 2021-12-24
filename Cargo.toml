@@ -20,4 +20,4 @@ docs-only = ["steamworks/docs-only"]
 bevy_log = "0.5"
 bevy_app = "0.5"
 bevy_ecs = "0.5"
-steamworks = "0.7"
+steamworks = { git = "https://github.com/james7132/steamworks-rs", branch ="v153a" }
