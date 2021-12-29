@@ -12,7 +12,7 @@ Add the following to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-bevy-steamworks = "0.1.0"
+bevy-steamworks = "0.1"
 ```
 
 Ensure that your computer has all the needed [requirements](https://rust-lang.github.io/rust-bindgen/requirements.html) to use [bindgen](https://github.com/rust-lang/rust-bindgen).
