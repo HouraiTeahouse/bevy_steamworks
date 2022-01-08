@@ -7,12 +7,20 @@
 This crate provides a [Bevy](https://bevyengine.org/) plugin for integrating with
 the Steamworks SDK via the steamworks crate.
 
+## Bevy Version Supported
+
+|Bevy Version |bevy\_steamworks|
+|:------------|:---------------|
+|git (main)   |git (develop)   |
+|0.6          |0.2             |
+|0.5          |0.1             |
+
 ## Installation
 Add the following to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-bevy-steamworks = "0.1"
+bevy-steamworks = "0.2"
 ```
 
 Ensure that your computer has all the needed [requirements](https://rust-lang.github.io/rust-bindgen/requirements.html) to use [bindgen](https://github.com/rust-lang/rust-bindgen).
