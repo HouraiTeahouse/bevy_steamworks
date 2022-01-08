@@ -17,7 +17,7 @@ default = []
 docs-only = ["steamworks/docs-only"]
 
 [dependencies]
-bevy_log = { git = "https://github.com/bevyengine/bevy", branch = "main" }
-bevy_app = { git = "https://github.com/bevyengine/bevy", branch = "main" }
-bevy_ecs = { git = "https://github.com/bevyengine/bevy", branch = "main" }
-steamworks = { git = "https://github.com/james7132/steamworks-rs", branch ="v153a" }
+bevy_log = "0.6"
+bevy_app = "0.6"
+bevy_ecs = "0.6"
+steamworks = "0.8"
