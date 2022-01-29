@@ -2,10 +2,10 @@
 name = "bevy-steamworks"
 version = "0.2.0"
 authors = ["james7132 <contact@jamessliu.com>"]
-edition = "2018"
+edition = "2021"
 description = "A Bevy plugin for integrating with the Steamworks SDK."
 repository = "https://github.com/james7132/bevy-steamworks"
-license = "MIT or Apache-2.0"
+license = "MIT OR Apache-2.0"
 keywords = ["bevy", "gamedev", "steam"]
 
 [package.metadata.docs.rs]
@@ -21,3 +21,7 @@ bevy_log = "0.6"
 bevy_app = "0.6"
 bevy_ecs = "0.6"
 steamworks = "0.8"
+parking_lot = "0.12"
+
+[dev-dependencies]
+bevy = "0.6"

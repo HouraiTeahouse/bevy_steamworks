@@ -5,10 +5,10 @@
 ![License](https://img.shields.io/crates/l/bevy-steamworks.svg)
 
 This crate provides a [Bevy](https://bevyengine.org/) plugin for integrating with
-the Steamworks SDK via the steamworks crate.
+the Steamworks SDK.
 
 ## Bevy Version Supported
-
+ 
 |Bevy Version |bevy\_steamworks|
 |:------------|:---------------|
 |git (main)   |git (develop)   |
@@ -23,27 +23,27 @@ Add the following to your `Cargo.toml`:
 bevy-steamworks = "0.2"
 ```
 
-Ensure that your computer has all the needed [requirements](https://rust-lang.github.io/rust-bindgen/requirements.html) to use [bindgen](https://github.com/rust-lang/rust-bindgen).
+Ensure that your build environment has all the needed
+[requirements](https://rust-lang.github.io/rust-bindgen/requirements.html) to use
+[bindgen](https://github.com/rust-lang/rust-bindgen).
 
 Download and install the [steamworks sdk](https://partner.steamgames.com/doc/sdk)
 and set the environment variable `STEAM_SDK_LOCATION` to point to it.
 
-At runtime, a "steam_appid.txt" file with the registered Steam App ID of the game
-is required in the same directory as the executable.
-
 ## Usage
 
-To add the plugin to your game, simply add the `SteamworksPlugin` to your
-`AppBuilder`.
+To add the plugin to your app, simply add the `SteamworksPlugin` to your
+`App`. This will require the `AppId` provided to you by Valve for initialization.
 
-```rust
+```rust no_run
 use bevy::prelude::*;
-use bevy_steamworks::SteamworksPlugin;
+use bevy_steamworks::*;
 
 fn main() {
-  App::build()
+  // Use the demo Steam AppId for SpaceWar
+  App::new()
       .add_plugins(DefaultPlugins)
-      .add_plugin(SteamworksPlugin)
+      .add_plugin(SteamworksPlugin::new(AppId(480)))
       .run()
 }
 ```
@@ -60,47 +60,22 @@ main thread every frame, so there is no need to run it manually.
 returns an error, an error wil lbe logged (via `bevy_log`), but it will not
 panic. In this case, it may be necessary to use `Option<Res<Client>>` instead.
 
-```rust
-use bevy_steamworks::{Client, FriendFlags};
+```rust no_run
+use bevy::prelude::*;
+use bevy_steamworks::*;
 
 fn steam_system(steam_client: Res<Client>) {
-  for friend in client.friends().get_friends(FriendFlags::IMMEDIATE) {
+  for friend in steam_client.friends().get_friends(FriendFlags::IMMEDIATE) {
     println!("Friend: {:?} - {}({:?})", friend.id(), friend.name(), friend.state());
   }
 }
 
 fn main() {
-  App::build()
+  // Use the demo Steam AppId for SpaceWar
+  App::new()
       .add_plugins(DefaultPlugins)
-      .add_plugin(SteamworksPlugin)
-      .add_startup_system(steam_system.system())
-      .run()
-}
-```
-
-### Events/Callbacks
-
-All of the callback based events sent by Steam's SDK will be forwarded to Bevy
-and can be read via a `EventReader` system param.
-
-```rust
-use bevy_steamworks::{Client, P2PSessionRequest};
-
-fn handle_p2p_session_requests(
-  steam_client: Res<Client>,
-  requests: EventReader<P2PSessionRequest>
-) {
-  for request in requests.iter() {
-    println!("P2P Session Request from: {:?}", request.remote);
-    steam_client.networking().accept_p2p_session(request.remote);
-  }
-}
-
-fn main() {
-  App::build()
-      .add_plugins(DefaultPlugins)
-      .add_plugin(SteamworksPlugin)
-      .add_system(handle_p2p_session_requests.system())
+      .add_plugin(SteamworksPlugin::new(AppId(480)))
+      .add_startup_system(steam_system)
       .run()
 }
 ```
