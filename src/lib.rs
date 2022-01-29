@@ -8,7 +8,7 @@
 //! |Bevy Version |bevy\_steamworks|
 //! |:------------|:---------------|
 //! |git (main)   |git (develop)   |
-//! |0.6          |0.2             |
+//! |0.6          |0.2, 0.3        |
 //! |0.5          |0.1             |
 //!
 //! ## Installation
@@ -16,7 +16,7 @@
 //!
 //! ```toml
 //! [dependencies]
-//! bevy-steamworks = "0.2"
+//! bevy-steamworks = "0.3"
 //! ```
 //!
 //! Ensure that your build environment has all the needed
