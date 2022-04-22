@@ -11,7 +11,7 @@ the Steamworks SDK.
  
 |Bevy Version |bevy\_steamworks|
 |:------------|:---------------|
-|git (main)   |git (develop)   |
+|0.7          |0.4             |
 |0.6          |0.2, 0.3        |
 |0.5          |0.1             |
 
@@ -20,7 +20,7 @@ Add the following to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-bevy-steamworks = "0.3"
+bevy-steamworks = "0.4"
 ```
 
 Ensure that your build environment has all the needed
