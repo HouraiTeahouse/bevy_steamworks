@@ -78,8 +78,8 @@
 //! }
 //! ```
 
-use bevy_app::{App,  Plugin};
-use bevy_ecs::{schedule::*, event::EventWriter, system::*};
+use bevy_app::{App, Plugin};
+use bevy_ecs::{event::EventWriter, schedule::*, system::*};
 use parking_lot::Mutex;
 use std::sync::Arc;
 pub use steamworks::*;
