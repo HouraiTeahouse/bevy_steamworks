@@ -1,6 +1,6 @@
 [package]
 name = "bevy-steamworks"
-version = "0.4.0"
+version = "0.5.0"
 authors = ["james7132 <contact@jamessliu.com>"]
 edition = "2021"
 description = "A Bevy plugin for integrating with the Steamworks SDK."
@@ -12,11 +12,11 @@ keywords = ["bevy", "gamedev", "steam"]
 default = []
 
 [dependencies]
-bevy_log = "0.7"
-bevy_app = "0.7"
-bevy_ecs = "0.7"
+bevy_log = "0.8"
+bevy_app = "0.8"
+bevy_ecs = "0.8"
 steamworks = "0.9"
 parking_lot = "0.12"
 
 [dev-dependencies]
-bevy = "0.7"
+bevy = "0.8"

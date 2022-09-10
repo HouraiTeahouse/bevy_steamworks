@@ -8,6 +8,7 @@
 //! |Bevy Version |bevy\_steamworks|
 //! |:------------|:---------------|
 //! |git (main)   |git (develop)   |
+//! |0.8          |0.5             |
 //! |0.7          |0.4             |
 //! |0.6          |0.2, 0.3        |
 //! |0.5          |0.1             |
@@ -17,7 +18,7 @@
 //!
 //! ```toml
 //! [dependencies]
-//! bevy-steamworks = "0.4"
+//! bevy-steamworks = "0.5"
 //! ```
 //!
 //! Ensure that your build environment has all the needed
@@ -77,8 +78,8 @@
 //! }
 //! ```
 
-use bevy_app::{App,  Plugin};
-use bevy_ecs::{schedule::*, event::EventWriter, system::*};
+use bevy_app::{App, Plugin};
+use bevy_ecs::{event::EventWriter, schedule::*, system::*};
 use parking_lot::Mutex;
 use std::sync::Arc;
 pub use steamworks::*;
