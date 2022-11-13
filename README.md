@@ -11,6 +11,7 @@ the Steamworks SDK.
  
 |Bevy Version |bevy\_steamworks|
 |:------------|:---------------|
+|0.9          |0.6             |
 |0.8          |0.5             |
 |0.7          |0.4             |
 |0.6          |0.2, 0.3        |
@@ -21,15 +22,11 @@ Add the following to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-bevy-steamworks = "0.5"
+bevy-steamworks = "0.6"
 ```
 
-Ensure that your build environment has all the needed
-[requirements](https://rust-lang.github.io/rust-bindgen/requirements.html) to use
-[bindgen](https://github.com/rust-lang/rust-bindgen).
-
-Download and install the [steamworks sdk](https://partner.steamgames.com/doc/sdk)
-and set the environment variable `STEAM_SDK_LOCATION` to point to it.
+The steamworks crate comes bundled with the redistributable dynamic libraries
+of a compatible version of the SDK. Currently it's v153a.
 
 ## Usage
 
@@ -55,11 +52,15 @@ and can be used to make requests via the SDK from any of Bevy's threads. However
 any asynchronous callbacks from Steam will only run on the main thread.
 
 The plugin will automatically call `SingleClient::run_callbacks` on the Bevy
-main thread every frame, so there is no need to run it manually.
+main thread every frame in `CoreStage::First`, so there is no need to run it
+manually.
 
 **NOTE**: If the plugin fails to initialize (i.e. `Client::init()` fails and
 returns an error, an error wil lbe logged (via `bevy_log`), but it will not
 panic. In this case, it may be necessary to use `Option<Res<Client>>` instead.
+
+All callbacks are forwarded as `Events` and can be listened to in the a
+Bevy idiomatic way:
 
 ```rust no_run
 use bevy::prelude::*;
