@@ -78,15 +78,54 @@
 //! }
 //! ```
 
-use bevy_app::{App, Plugin};
-use bevy_ecs::{event::EventWriter, schedule::*, system::*};
+use bevy_app::{App, Plugin, CoreStage};
+use bevy_ecs::{
+    event::EventWriter,
+    schedule::*,
+    system::{NonSend, ResMut, Resource},
+};
 use parking_lot::Mutex;
-use std::sync::Arc;
-pub use steamworks::*;
+use std::{sync::Arc, ops::Deref};
 
+// Reexport everything from steamworks except for the clients
+pub use steamworks::{
+    networking_utils::*, networking_messages::*, networking_sockets::*, stats::*, AccountId,
+    AppIDs, AppId, Apps, AuthSessionError, AuthSessionTicketResponse, AuthSessionValidateError,
+    AuthTicket, Callback, CallbackHandle, ChatMemberStateChange, ClientManager,
+    CreateQueryError, DownloadItemResult, FileType, Friend, FriendFlags, FriendGame,
+    FriendState, Friends, GameId, GameLobbyJoinRequested, InstallInfo, InvalidErrorCode,
+    ItemDetailsQuery, ItemListDetailsQuery, ItemState, Leaderboard, LeaderboardDataRequest,
+    LeaderboardDisplayType, LeaderboardEntry, LeaderboardScoreUploaded, LeaderboardSortMethod,
+    LobbyChatUpdate, LobbyId, LobbyType, Matchmaking, Networking, NotificationPosition,
+    P2PSessionConnectFail, P2PSessionRequest, PersonaChange, PersonaStateChange, PublishedFileId,
+    QueryResult, QueryResults, RemoteStorage, SResult, SendType, Server, ServerManager, ServerMode,
+    SingleClient, SteamError, SteamFile, SteamFileInfo, SteamFileReader, SteamFileWriter, SteamId,
+    SteamServerConnectFailure, SteamServersConnected, SteamServersDisconnected, UGCStatisticType,
+    UGCType, UpdateHandle, UpdateStatus, UpdateWatchHandle, UploadScoreMethod, User,
+    UserAchievementStored, UserList, UserListOrder, UserListQuery, UserStats, UserStatsReceived,
+    UserStatsStored, Utils, ValidateAuthTicketResponse, RESULTS_PER_PAGE, UGC,
+};
+
+#[derive(Resource)]
 struct SteamEvents<T> {
     _callback: CallbackHandle,
     pending: Arc<Mutex<Vec<T>>>,
+}
+
+/// A Bevy compatible wrapper around [`steamworks::Client`].
+/// 
+/// Automatically dereferences to the client so it can be transparently
+/// used.
+/// 
+/// For more information on how to use it, see [`steamworks::Client`].
+#[derive(Resource, Clone)]
+pub struct Client(steamworks::Client);
+
+impl Deref for Client {
+    type Target = steamworks::Client;
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
 }
 
 /// A Bevy [`Plugin`] for adding support for the Steam SDK.
@@ -104,22 +143,27 @@ impl SteamworksPlugin {
 
 impl Plugin for SteamworksPlugin {
     fn build(&self, app: &mut App) {
-        if app.world.contains_resource::<Client<ClientManager>>() {
+        if app.world.contains_resource::<Client>() {
             bevy_log::warn!("Attempted to add the Steamworks plugin multiple times!");
             return;
         }
-        match Client::init_app(self.0) {
+        match steamworks::Client::init_app(self.0) {
             Err(err) => bevy_log::error!("Failed to initialize Steamworks client: {}", err),
             Ok((client, single)) => {
-                app.insert_resource(client.clone())
+                app.insert_resource(Client(client.clone()))
                     .insert_non_send_resource(single)
-                    .add_system(run_steam_callbacks.label(SteamworksSystem::RunCallbacks));
+                    .add_system_to_stage(CoreStage::First, run_steam_callbacks.label(SteamworksSystem::RunCallbacks));
 
                 add_event::<AuthSessionTicketResponse>(app, &client);
+                add_event::<DownloadItemResult>(app, &client);
                 add_event::<GameLobbyJoinRequested>(app, &client);
+                add_event::<LobbyChatUpdate>(app, &client);
                 add_event::<P2PSessionConnectFail>(app, &client);
                 add_event::<P2PSessionRequest>(app, &client);
                 add_event::<PersonaStateChange>(app, &client);
+                add_event::<SteamServerConnectFailure>(app, &client);
+                add_event::<SteamServersConnected>(app, &client);
+                add_event::<SteamServersDisconnected>(app, &client);
                 add_event::<UserAchievementStored>(app, &client);
                 add_event::<UserStatsReceived>(app, &client);
                 add_event::<UserStatsStored>(app, &client);
@@ -131,15 +175,19 @@ impl Plugin for SteamworksPlugin {
 
 /// A set of [`SystemLabel`]s for systems used by [`SteamworksPlugin`]
 ///
-/// [`SystemLabel`]: bevy_ecs::system::SystemLabel
+/// [`SystemLabel`]: bevy_ecs::schedule::SystemLabel
 #[derive(Debug, Clone, Copy, Eq, Hash, SystemLabel, PartialEq)]
 pub enum SteamworksSystem {
     /// A system that runs the Steam SDK callbacks. Anything dependent on
-    /// Steam API results should run after this.
+    /// Steam API results should run after this. This runs in 
+    /// [`CoreStage::First`].
     RunCallbacks,
     /// A set of systems for flushing events from the Steam SDK into bevy.
     /// If using [`EventReader`] with any of these events, it should be
-    /// scheduled after these systems.
+    /// scheduled after these systems. These systems run in 
+    /// [`CoreStage::PreUpdate`].
+    /// 
+    /// [`EventReader`]: bevy_ecs::event::EventReader
     FlushEvents,
 }
 
@@ -157,7 +205,7 @@ fn flush_events<T: Send + Sync + 'static>(
     }
 }
 
-fn add_event<T: Callback + Send + Sync + 'static>(app: &mut App, client: &Client<ClientManager>) {
+fn add_event<T: Callback + Send + Sync + 'static>(app: &mut App, client: &steamworks::Client<ClientManager>) {
     let pending = Arc::new(Mutex::new(Vec::new()));
     let pending_in = pending.clone();
     app.add_event::<T>()
@@ -167,7 +215,8 @@ fn add_event<T: Callback + Send + Sync + 'static>(app: &mut App, client: &Client
             }),
             pending,
         })
-        .add_system(
+        .add_system_to_stage(
+            CoreStage::PreUpdate,
             flush_events::<T>
                 .label(SteamworksSystem::FlushEvents)
                 .after(SteamworksSystem::RunCallbacks),
