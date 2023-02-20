@@ -5,24 +5,29 @@
 //!
 //! ## Bevy Version Supported
 //!
-//! |Bevy Version |bevy\_steamworks|
-//! |:------------|:---------------|
-//! |git (main)   |git (develop)   |
-//! |0.8          |0.5             |
-//! |0.7          |0.4             |
-//! |0.6          |0.2, 0.3        |
-//! |0.5          |0.1             |
+//! | Using<br/>bevy\_steamworks | Works On<br/>[Bevy] | Provides<br/>[steamworks-rs] |
+//! |:---------------------------|:--------------------|------------------------------|
+//! | git (dev)                  | git (main)          | git (master)                 |
+//! | 0.6                        | 0.9                 | 0.9                          |
+//! | 0.5                        | 0.8                 | 0.9                          |
+//! | 0.4                        | 0.7                 | 0.9                          |
+//! | 0.2, 0.3                   | 0.6                 | 0.8                          |
+//! | 0.1                        | 0.5                 | 0.7                          |
+//!
+//! [Bevy]:https://github.com/bevyengine/bevy
+//! [steamworks-rs]:https://github.com/bevyengine/bevy
 //!
 //! ## Installation
+//!
 //! Add the following to your `Cargo.toml`:
 //!
 //! ```toml
 //! [dependencies]
-//! bevy-steamworks = "0.5"
+//! bevy-steamworks = "0.6"
 //! ```
 //!
 //! The steamworks crate comes bundled with the redistributable dynamic libraries
-//! of a compatible version of the SDK. Currently it's v153a.
+//! of a compatible version of the SDK. Currently, it's v153a.
 //!
 //! ## Usage
 //!
@@ -48,14 +53,14 @@
 //! any asynchronous callbacks from Steam will only run on the main thread.
 //!
 //! The plugin will automatically call [`SingleClient::run_callbacks`] on the Bevy
-//! main thread every frame in [`CoreStage::First`], so there is no need to run it
+//! main thread every frame in [`CoreSet::First`], so there is no need to run it
 //! manually.
 //!
 //! **NOTE**: If the plugin fails to initialize (i.e. `Client::init()` fails and
 //! returns an error, an error wil lbe logged (via `bevy_log`), but it will not
-//! panic. In this case, it may be necessary to use `Option<Res<Client>>` instead.
+//! panic. In this case, it may be necessary to use `Option<Res<Client>>` instead.)
 //!
-//! All callbacks are forwarded as [`Events`] and can be listened to in the a
+//! All callbacks are forwarded as [`Events`] and can be listened to in the
 //! Bevy idiomatic way:
 //!
 //! ```rust no_run
@@ -78,7 +83,7 @@
 //! }
 //! ```
 
-use bevy_app::{App, CoreStage, Plugin};
+use bevy_app::{App, CoreSet, Plugin};
 use bevy_ecs::{
     event::EventWriter,
     schedule::*,
@@ -130,7 +135,7 @@ impl Deref for Client {
 
 /// A Bevy [`Plugin`] for adding support for the Steam SDK.
 ///
-/// [`Plugin`]: bevy_app::Plugin
+/// [`Plugin`]: Plugin
 pub struct SteamworksPlugin(AppId);
 
 impl SteamworksPlugin {
@@ -152,10 +157,7 @@ impl Plugin for SteamworksPlugin {
             Ok((client, single)) => {
                 app.insert_resource(Client(client.clone()))
                     .insert_non_send_resource(single)
-                    .add_system_to_stage(
-                        CoreStage::First,
-                        run_steam_callbacks.label(SteamworksSystem::RunCallbacks),
-                    );
+                    .add_system(run_steam_callbacks.in_base_set(CoreSet::First));
 
                 add_event::<AuthSessionTicketResponse>(app, &client);
                 add_event::<DownloadItemResult>(app, &client);
@@ -176,19 +178,19 @@ impl Plugin for SteamworksPlugin {
     }
 }
 
-/// A set of [`SystemLabel`]s for systems used by [`SteamworksPlugin`]
+/// A set of [`SystemSet`]s for systems used by [`SteamworksPlugin`]
 ///
-/// [`SystemLabel`]: bevy_ecs::schedule::SystemLabel
-#[derive(Debug, Clone, Copy, Eq, Hash, SystemLabel, PartialEq)]
+/// [`SystemSet`]: bevy_ecs::schedule::SystemSet
+#[derive(Debug, Clone, Copy, Eq, Hash, SystemSet, PartialEq)]
 pub enum SteamworksSystem {
     /// A system that runs the Steam SDK callbacks. Anything dependent on
     /// Steam API results should run after this. This runs in
-    /// [`CoreStage::First`].
+    /// [`CoreSet::First`].
     RunCallbacks,
     /// A set of systems for flushing events from the Steam SDK into bevy.
     /// If using [`EventReader`] with any of these events, it should be
     /// scheduled after these systems. These systems run in
-    /// [`CoreStage::PreUpdate`].
+    /// [`CoreSet::PreUpdate`].
     ///
     /// [`EventReader`]: bevy_ecs::event::EventReader
     FlushEvents,
@@ -221,10 +223,9 @@ fn add_event<T: Callback + Send + Sync + 'static>(
             }),
             pending,
         })
-        .add_system_to_stage(
-            CoreStage::PreUpdate,
+        .add_system(
             flush_events::<T>
-                .label(SteamworksSystem::FlushEvents)
-                .after(SteamworksSystem::RunCallbacks),
+                .after(run_steam_callbacks)
+                .in_base_set(CoreSet::PreUpdate),
         );
 }

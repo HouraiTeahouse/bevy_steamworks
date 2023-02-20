@@ -8,16 +8,21 @@ This crate provides a [Bevy](https://bevyengine.org/) plugin for integrating wit
 the Steamworks SDK.
 
 ## Bevy Version Supported
- 
-|Bevy Version |bevy\_steamworks|
-|:------------|:---------------|
-|0.9          |0.6             |
-|0.8          |0.5             |
-|0.7          |0.4             |
-|0.6          |0.2, 0.3        |
-|0.5          |0.1             |
+
+| Using<br/>bevy\_steamworks | Works On<br/>[Bevy] | Provides<br/>[steamworks-rs] |
+|:---------------------------|:--------------------|------------------------------|
+| git (dev)                  | git (main)          | git (master)                 |
+| 0.6                        | 0.9                 | 0.9                          |
+| 0.5                        | 0.8                 | 0.9                          |
+| 0.4                        | 0.7                 | 0.9                          |
+| 0.2, 0.3                   | 0.6                 | 0.8                          |
+| 0.1                        | 0.5                 | 0.7                          |
+
+[Bevy]:https://github.com/bevyengine/bevy
+[steamworks-rs]:https://github.com/bevyengine/bevy
 
 ## Installation
+
 Add the following to your `Cargo.toml`:
 
 ```toml
@@ -26,7 +31,7 @@ bevy-steamworks = "0.6"
 ```
 
 The steamworks crate comes bundled with the redistributable dynamic libraries
-of a compatible version of the SDK. Currently it's v153a.
+of a compatible version of the SDK. Currently, it's v153a.
 
 ## Usage
 
@@ -57,9 +62,9 @@ manually.
 
 **NOTE**: If the plugin fails to initialize (i.e. `Client::init()` fails and
 returns an error, an error wil lbe logged (via `bevy_log`), but it will not
-panic. In this case, it may be necessary to use `Option<Res<Client>>` instead.
+panic. In this case, it may be necessary to use `Option<Res<Client>>` instead.)
 
-All callbacks are forwarded as `Events` and can be listened to in the a
+All callbacks are forwarded as `Events` and can be listened to in the
 Bevy idiomatic way:
 
 ```rust no_run

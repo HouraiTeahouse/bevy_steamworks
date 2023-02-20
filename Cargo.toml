@@ -1,6 +1,6 @@
 [package]
 name = "bevy-steamworks"
-version = "0.6.0"
+version = "0.7.0"
 authors = ["james7132 <contact@jamessliu.com>"]
 edition = "2021"
 description = "A Bevy plugin for integrating with the Steamworks SDK."
@@ -12,11 +12,11 @@ keywords = ["bevy", "gamedev", "steam"]
 default = []
 
 [dependencies]
-bevy_log = "0.9"
-bevy_app = "0.9"
-bevy_ecs = "0.9"
-steamworks = "0.9"
+bevy_log = { git = "https://github.com/bevyengine/bevy", branch = "main", package = "bevy_log" }
+bevy_app = { git = "https://github.com/bevyengine/bevy", branch = "main", package = "bevy_app" }
+bevy_ecs = { git = "https://github.com/bevyengine/bevy", branch = "main", package = "bevy_ecs" }
+steamworks = { git = "https://github.com/Noxime/steamworks-rs", branch = "master" }
 parking_lot = "0.12"
 
 [dev-dependencies]
-bevy = "0.9"
+bevy = { git = "https://github.com/bevyengine/bevy", branch = "main" }
