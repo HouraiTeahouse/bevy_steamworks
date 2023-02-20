@@ -19,7 +19,7 @@ the Steamworks SDK.
 | 0.1                        | 0.5                 | 0.7                          |
 
 [Bevy]:https://github.com/bevyengine/bevy
-[steamworks-rs]:https://github.com/bevyengine/bevy
+[steamworks-rs]:https://github.com/Noxime/steamworks-rs
 
 ## Installation
 
