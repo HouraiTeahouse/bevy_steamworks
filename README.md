@@ -5,37 +5,48 @@
 ![License](https://img.shields.io/crates/l/bevy-steamworks.svg)
 
 This crate provides a [Bevy](https://bevyengine.org/) plugin for integrating with
-the Steamworks SDK via the steamworks crate.
+the Steamworks SDK.
+
+## Bevy Version Supported
+
+| Using<br/>bevy\_steamworks | Works On<br/>[Bevy] | Provides<br/>[steamworks-rs] |
+|:---------------------------|:--------------------|------------------------------|
+| git (dev)                  | git (main)          | git (master)                 |
+| 0.6                        | 0.9                 | 0.9                          |
+| 0.5                        | 0.8                 | 0.9                          |
+| 0.4                        | 0.7                 | 0.9                          |
+| 0.2, 0.3                   | 0.6                 | 0.8                          |
+| 0.1                        | 0.5                 | 0.7                          |
+
+[Bevy]:https://github.com/bevyengine/bevy
+[steamworks-rs]:https://github.com/bevyengine/bevy
 
 ## Installation
+
 Add the following to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-bevy-steamworks = "0.1"
+bevy-steamworks = "0.6"
 ```
 
-Ensure that your computer has all the needed [requirements](https://rust-lang.github.io/rust-bindgen/requirements.html) to use [bindgen](https://github.com/rust-lang/rust-bindgen).
-
-Download and install the [steamworks sdk](https://partner.steamgames.com/doc/sdk)
-and set the environment variable `STEAM_SDK_LOCATION` to point to it.
-
-At runtime, a "steam_appid.txt" file with the registered Steam App ID of the game
-is required in the same directory as the executable.
+The steamworks crate comes bundled with the redistributable dynamic libraries
+of a compatible version of the SDK. Currently, it's v153a.
 
 ## Usage
 
-To add the plugin to your game, simply add the `SteamworksPlugin` to your
-`AppBuilder`.
+To add the plugin to your app, simply add the `SteamworksPlugin` to your
+`App`. This will require the `AppId` provided to you by Valve for initialization.
 
-```rust
+```rust no_run
 use bevy::prelude::*;
-use bevy_steamworks::SteamworksPlugin;
+use bevy_steamworks::*;
 
 fn main() {
-  App::build()
+  // Use the demo Steam AppId for SpaceWar
+  App::new()
       .add_plugins(DefaultPlugins)
-      .add_plugin(SteamworksPlugin)
+      .add_plugin(SteamworksPlugin::new(AppId(480)))
       .run()
 }
 ```
@@ -46,53 +57,32 @@ and can be used to make requests via the SDK from any of Bevy's threads. However
 any asynchronous callbacks from Steam will only run on the main thread.
 
 The plugin will automatically call `SingleClient::run_callbacks` on the Bevy
-main thread every frame, so there is no need to run it manually.
+main thread every frame in `CoreStage::First`, so there is no need to run it
+manually.
 
 **NOTE**: If the plugin fails to initialize (i.e. `Client::init()` fails and
 returns an error, an error wil lbe logged (via `bevy_log`), but it will not
-panic. In this case, it may be necessary to use `Option<Res<Client>>` instead.
+panic. In this case, it may be necessary to use `Option<Res<Client>>` instead.)
 
-```rust
-use bevy_steamworks::{Client, FriendFlags};
+All callbacks are forwarded as `Events` and can be listened to in the
+Bevy idiomatic way:
+
+```rust no_run
+use bevy::prelude::*;
+use bevy_steamworks::*;
 
 fn steam_system(steam_client: Res<Client>) {
-  for friend in client.friends().get_friends(FriendFlags::IMMEDIATE) {
+  for friend in steam_client.friends().get_friends(FriendFlags::IMMEDIATE) {
     println!("Friend: {:?} - {}({:?})", friend.id(), friend.name(), friend.state());
   }
 }
 
 fn main() {
-  App::build()
+  // Use the demo Steam AppId for SpaceWar
+  App::new()
       .add_plugins(DefaultPlugins)
-      .add_plugin(SteamworksPlugin)
-      .add_startup_system(steam_system.system())
-      .run()
-}
-```
-
-### Events/Callbacks
-
-All of the callback based events sent by Steam's SDK will be forwarded to Bevy
-and can be read via a `EventReader` system param.
-
-```rust
-use bevy_steamworks::{Client, P2PSessionRequest};
-
-fn handle_p2p_session_requests(
-  steam_client: Res<Client>,
-  requests: EventReader<P2PSessionRequest>
-) {
-  for request in requests.iter() {
-    println!("P2P Session Request from: {:?}", request.remote);
-    steam_client.networking().accept_p2p_session(request.remote);
-  }
-}
-
-fn main() {
-  App::build()
-      .add_plugins(DefaultPlugins)
-      .add_plugin(SteamworksPlugin)
-      .add_system(handle_p2p_session_requests.system())
+      .add_plugin(SteamworksPlugin::new(AppId(480)))
+      .add_startup_system(steam_system)
       .run()
 }
 ```

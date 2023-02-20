@@ -1,23 +1,22 @@
 [package]
 name = "bevy-steamworks"
-version = "0.1.2"
+version = "0.7.0"
 authors = ["james7132 <contact@jamessliu.com>"]
-edition = "2018"
+edition = "2021"
 description = "A Bevy plugin for integrating with the Steamworks SDK."
 repository = "https://github.com/james7132/bevy-steamworks"
-license = "MIT or Apache-2.0"
+license = "MIT OR Apache-2.0"
 keywords = ["bevy", "gamedev", "steam"]
-
-[package.metadata.docs.rs]
-features = [ "docs-only" ]
 
 [features]
 default = []
-# Skip looking for the steamworks sdk for docs builds
-docs-only = ["steamworks/docs-only"]
 
 [dependencies]
-bevy_log = { git = "https://github.com/bevyengine/bevy", branch = "main" }
-bevy_app = { git = "https://github.com/bevyengine/bevy", branch = "main" }
-bevy_ecs = { git = "https://github.com/bevyengine/bevy", branch = "main" }
-steamworks = { git = "https://github.com/james7132/steamworks-rs", branch ="v153a" }
+bevy_log = { git = "https://github.com/bevyengine/bevy", branch = "main", package = "bevy_log" }
+bevy_app = { git = "https://github.com/bevyengine/bevy", branch = "main", package = "bevy_app" }
+bevy_ecs = { git = "https://github.com/bevyengine/bevy", branch = "main", package = "bevy_ecs" }
+steamworks = { git = "https://github.com/Noxime/steamworks-rs", branch = "master" }
+parking_lot = "0.12"
+
+[dev-dependencies]
+bevy = { git = "https://github.com/bevyengine/bevy", branch = "main" }
