@@ -154,7 +154,7 @@ impl Plugin for SteamworksPlugin {
                     .insert_non_send_resource(single)
                     .add_system(run_steam_callbacks
                         .in_base_set(CoreSet::First)
-                        .in_set(SteamworksSystem::RunCallbacks)
+                        .in_set(SteamworksSystem::RunCallbacks),
                     );
 
                 add_event::<AuthSessionTicketResponse>(app, &client);
@@ -224,6 +224,6 @@ fn add_event<T: Callback + Send + Sync + 'static>(
         .add_system(
             flush_events::<T>
                 .in_set(SteamworksSystem::FlushEvents)
-                .after(SteamworksSystem::RunCallbacks)
+                .after(SteamworksSystem::RunCallbacks),
         );
 }
