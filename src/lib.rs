@@ -1,4 +1,3 @@
-#![forbid(unsafe_code)]
 #![deny(missing_docs)]
 
 //! This crate provides a [Bevy](https://bevyengine.org/) plugin for integrating with
@@ -69,7 +68,7 @@ use bevy_ecs::{
     schedule::*,
     system::{NonSend, ResMut, Resource},
 };
-use parking_lot::Mutex;
+use bevy_utils::syncunsafecell::SyncUnsafeCell;
 // Reexport everything from steamworks except for the clients
 pub use steamworks::{
     networking_messages::*, networking_sockets::*, networking_utils::*, stats::*, AccountId,
@@ -92,7 +91,7 @@ pub use steamworks::{
 #[derive(Resource)]
 struct SteamEvents<T> {
     _callback: CallbackHandle,
-    pending: Arc<Mutex<Vec<T>>>,
+    pending: Arc<SyncUnsafeCell<Vec<T>>>,
 }
 
 /// A Bevy compatible wrapper around [`steamworks::Client`].
@@ -186,7 +185,10 @@ fn flush_events<T: Send + Sync + 'static>(
     events: ResMut<SteamEvents<T>>,
     mut output: EventWriter<T>,
 ) {
-    let mut pending = events.pending.lock();
+    // SAFETY: The callback is only called during `run_steam_callbacks` which cannot run
+    // while any of the flush_events systems are running. The system is registered only once for
+    // the client. This cannot alias.
+    let pending = unsafe { &mut *events.pending.get() };
     if !pending.is_empty() {
         output.send_batch(pending.drain(0..));
     }
@@ -196,12 +198,14 @@ fn add_event<T: Callback + Send + Sync + 'static>(
     app: &mut App,
     client: &steamworks::Client<ClientManager>,
 ) {
-    let pending = Arc::new(Mutex::new(Vec::new()));
+    let pending = Arc::new(SyncUnsafeCell::new(Vec::new()));
     let pending_in = pending.clone();
     app.add_event::<T>()
         .insert_resource(SteamEvents::<T> {
             _callback: client.register_callback::<T, _>(move |evt| {
-                pending_in.lock().push(evt);
+                // SAFETY: The callback is only called during `run_steam_callbacks` which cannot run
+                // while any of the flush_events systems are running. This cannot alias.
+                unsafe { (&mut *pending_in.get()).push(evt); }
             }),
             pending,
         })
