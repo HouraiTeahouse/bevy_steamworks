@@ -134,11 +134,13 @@ impl Plugin for SteamworksPlugin {
             Ok((client, single)) => {
                 app.insert_resource(Client(client.clone()))
                     .insert_non_send_resource(single)
-                    .add_system(
-                        run_steam_callbacks
+                    .configure_set(SteamworksSystem::RunCallbacks.in_base_set(CoreSet::First))
+                    .configure_set(
+                        SteamworksSystem::FlushEvents
                             .in_base_set(CoreSet::First)
-                            .in_set(SteamworksSystem::RunCallbacks),
-                    );
+                            .after(SteamworksSystem::RunCallbacks),
+                    )
+                    .add_system(run_steam_callbacks.in_set(SteamworksSystem::RunCallbacks));
 
                 add_event::<AuthSessionTicketResponse>(app, &client);
                 add_event::<DownloadItemResult>(app, &client);
@@ -205,13 +207,11 @@ fn add_event<T: Callback + Send + Sync + 'static>(
             _callback: client.register_callback::<T, _>(move |evt| {
                 // SAFETY: The callback is only called during `run_steam_callbacks` which cannot run
                 // while any of the flush_events systems are running. This cannot alias.
-                unsafe { (&mut *pending_in.get()).push(evt); }
+                unsafe {
+                    (&mut *pending_in.get()).push(evt);
+                }
             }),
             pending,
         })
-        .add_system(
-            flush_events::<T>
-                .in_set(SteamworksSystem::FlushEvents)
-                .after(SteamworksSystem::RunCallbacks),
-        );
+        .add_system(flush_events::<T>.in_set(SteamworksSystem::FlushEvents));
 }
