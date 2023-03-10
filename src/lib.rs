@@ -89,21 +89,21 @@ use bevy_ecs::{
 use parking_lot::Mutex;
 // Reexport everything from steamworks except for the clients
 pub use steamworks::{
-    AccountId, AppId, AppIDs, Apps, AuthSessionError,
-    AuthSessionTicketResponse, AuthSessionValidateError, AuthTicket, Callback, CallbackHandle, ChatMemberStateChange,
-    ClientManager, CreateQueryError, DownloadItemResult, FileType, Friend, FriendFlags,
-    FriendGame, Friends, FriendState, GameId, GameLobbyJoinRequested, InstallInfo, InvalidErrorCode, ItemDetailsQuery,
-    ItemListDetailsQuery, ItemState, Leaderboard, LeaderboardDataRequest, LeaderboardDisplayType,
-    LeaderboardEntry, LeaderboardScoreUploaded, LeaderboardSortMethod, LobbyChatUpdate, LobbyId,
-    LobbyType, Matchmaking, Networking, networking_messages::*, networking_sockets::*,
-    networking_utils::*, NotificationPosition, P2PSessionConnectFail, P2PSessionRequest, PersonaChange,
-    PersonaStateChange, PublishedFileId, QueryResult, QueryResults, RemoteStorage, RESULTS_PER_PAGE,
-    SendType, Server, ServerManager, ServerMode, SingleClient, SResult, stats::*, SteamError,
-    SteamFile, SteamFileInfo, SteamFileReader, SteamFileWriter, SteamId,
-    SteamServerConnectFailure, SteamServersConnected, SteamServersDisconnected, UGC, UGCStatisticType,
-    UGCType, UpdateHandle, UpdateStatus, UpdateWatchHandle, UploadScoreMethod, User,
-    UserAchievementStored, UserList, UserListOrder, UserListQuery, UserStats, UserStatsReceived,
-    UserStatsStored, Utils, ValidateAuthTicketResponse,
+    networking_messages::*, networking_sockets::*, networking_utils::*, stats::*, AccountId,
+    AppIDs, AppId, Apps, AuthSessionError, AuthSessionTicketResponse, AuthSessionValidateError,
+    AuthTicket, Callback, CallbackHandle, ChatMemberStateChange, ClientManager, CreateQueryError,
+    DownloadItemResult, FileType, Friend, FriendFlags, FriendGame, FriendState, Friends, GameId,
+    GameLobbyJoinRequested, InstallInfo, InvalidErrorCode, ItemDetailsQuery, ItemListDetailsQuery,
+    ItemState, Leaderboard, LeaderboardDataRequest, LeaderboardDisplayType, LeaderboardEntry,
+    LeaderboardScoreUploaded, LeaderboardSortMethod, LobbyChatUpdate, LobbyId, LobbyType,
+    Matchmaking, Networking, NotificationPosition, P2PSessionConnectFail, P2PSessionRequest,
+    PersonaChange, PersonaStateChange, PublishedFileId, QueryResult, QueryResults, RemoteStorage,
+    SResult, SendType, Server, ServerManager, ServerMode, SingleClient, SteamError, SteamFile,
+    SteamFileInfo, SteamFileReader, SteamFileWriter, SteamId, SteamServerConnectFailure,
+    SteamServersConnected, SteamServersDisconnected, UGCStatisticType, UGCType, UpdateHandle,
+    UpdateStatus, UpdateWatchHandle, UploadScoreMethod, User, UserAchievementStored, UserList,
+    UserListOrder, UserListQuery, UserStats, UserStatsReceived, UserStatsStored, Utils,
+    ValidateAuthTicketResponse, RESULTS_PER_PAGE, UGC,
 };
 
 #[derive(Resource)]
@@ -152,9 +152,10 @@ impl Plugin for SteamworksPlugin {
             Ok((client, single)) => {
                 app.insert_resource(Client(client.clone()))
                     .insert_non_send_resource(single)
-                    .add_system(run_steam_callbacks
-                        .in_base_set(CoreSet::First)
-                        .in_set(SteamworksSystem::RunCallbacks),
+                    .add_system(
+                        run_steam_callbacks
+                            .in_base_set(CoreSet::First)
+                            .in_set(SteamworksSystem::RunCallbacks),
                     );
 
                 add_event::<AuthSessionTicketResponse>(app, &client);
