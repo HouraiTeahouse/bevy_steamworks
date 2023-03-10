@@ -15,13 +15,9 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - uses: actions-rs/toolchain@v1
-        id: toolchain
+      - uses: dtolnay/rust-toolchain@stable
         with:
-          toolchain: ${{ matrix.toolchain }}
-          profile: minimal
           components: rustfmt, clippy
-          override: true
 
       - name: Install alsa and udev
         run: sudo apt-get update; sudo apt-get install --no-install-recommends libasound2-dev libudev-dev
@@ -36,22 +32,10 @@ jobs:
             target
           key: ${{ runner.os }}-test-rustc-${{ steps.toolchain.outputs.rustc_hash }}-${{ hashFiles('**/Cargo.lock') }}
 
-      - uses: actions-rs/cargo@v1
+      - run: cargo fmt --all -- --check
         if: runner.os == 'linux'
-        with:
-          command: fmt
-          args: --all -- --check
 
-      - uses: actions-rs/clippy-check@v1
+      - run: cargo clippy --all-features
         if: runner.os == 'linux'
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          args: --all-features
 
-      - uses: actions-rs/cargo@v1
-        with:
-          command: test
-          args: --workspace --exclude backroll_transport_steam
-        env:
-          CARGO_INCREMENTAL: 0
-          RUSTFLAGS: "-C debuginfo=0"
+      - run: cargo test  --workspace
