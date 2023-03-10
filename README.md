@@ -7,22 +7,12 @@
 This crate provides a [Bevy](https://bevyengine.org/) plugin for integrating with
 the Steamworks SDK.
 
-## Bevy Version Supported
- 
-|Bevy Version |bevy\_steamworks|
-|:------------|:---------------|
-|0.9          |0.6             |
-|0.8          |0.5             |
-|0.7          |0.4             |
-|0.6          |0.2, 0.3        |
-|0.5          |0.1             |
-
 ## Installation
 Add the following to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-bevy-steamworks = "0.6"
+bevy-steamworks = "0.7"
 ```
 
 The steamworks crate comes bundled with the redistributable dynamic libraries
@@ -81,3 +71,14 @@ fn main() {
       .run()
 }
 ```
+
+## Bevy Version Supported
+ 
+|Bevy Version |bevy\_steamworks|
+|:------------|:---------------|
+|0.10         |0.7             |
+|0.9          |0.6             |
+|0.8          |0.5             |
+|0.7          |0.4             |
+|0.6          |0.2, 0.3        |
+|0.5          |0.1             |
