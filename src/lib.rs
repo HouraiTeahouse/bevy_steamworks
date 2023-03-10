@@ -1,3 +1,4 @@
+#![forbid(unsafe_code)]
 #![deny(missing_docs)]
 
 //! This crate provides a [Bevy](https://bevyengine.org/) plugin for integrating with
