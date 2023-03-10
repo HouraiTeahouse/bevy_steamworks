@@ -4,7 +4,7 @@
 //! This crate provides a [Bevy](https://bevyengine.org/) plugin for integrating with
 //! the Steamworks SDK.
 //!
-//! The underlying steamworks crate comes bundled with the redistributable dynamic 
+//! The underlying steamworks crate comes bundled with the redistributable dynamic
 //! libraries a compatible version of the SDK. Currently it's v153a.
 //!
 //! ## Usage
