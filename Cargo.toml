@@ -20,3 +20,6 @@ steamworks = "0.10"
 
 [dev-dependencies]
 bevy = "0.10"
+
+[patch.crates-io]
+steamworks = { path = "../steamworks-rs" }
