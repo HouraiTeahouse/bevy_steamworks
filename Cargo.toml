@@ -19,4 +19,4 @@ bevy_utils = "0.10"
 steamworks = "0.10"
 
 [dev-dependencies]
-bevy = "0.10"
+bevy = "0.11"
