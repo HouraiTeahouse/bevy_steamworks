@@ -12,14 +12,14 @@ keywords = ["bevy", "gamedev", "steam"]
 default = []
 
 [dependencies]
-bevy_log = "0.10"
-bevy_app = "0.10"
-bevy_ecs = "0.10"
-bevy_utils = "0.10"
+bevy_log = "0.11"
+bevy_app = "0.11"
+bevy_ecs = "0.11"
+bevy_utils = "0.11"
 steamworks = "0.10"
 
 [dev-dependencies]
-bevy = "0.10"
+bevy = "0.11"
 
 [patch.crates-io]
 steamworks = { path = "../steamworks-rs" }
