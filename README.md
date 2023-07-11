@@ -12,7 +12,7 @@ Add the following to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-bevy-steamworks = "0.7"
+bevy-steamworks = "0.8"
 ```
 
 The steamworks crate comes bundled with the redistributable dynamic libraries
@@ -76,6 +76,7 @@ fn main() {
  
 |Bevy Version |bevy\_steamworks|
 |:------------|:---------------|
+|0.11         |0.8             |
 |0.10         |0.7             |
 |0.9          |0.6             |
 |0.8          |0.5             |
