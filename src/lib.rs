@@ -62,7 +62,7 @@
 
 use std::{ops::Deref, sync::Arc};
 
-use bevy_app::{App, First, Plugin, Update};
+use bevy_app::{App, First, Plugin};
 use bevy_ecs::{
     event::EventWriter,
     prelude::Event,
@@ -152,8 +152,6 @@ impl Deref for Client {
 }
 
 /// A Bevy [`Plugin`] for adding support for the Steam SDK.
-///
-/// [`Plugin`]: Plugin
 pub struct SteamworksPlugin(AppId);
 
 impl SteamworksPlugin {
@@ -199,10 +197,10 @@ impl Plugin for SteamworksPlugin {
                         SteamworksSystem::FlushEvents.after(SteamworksSystem::RunCallbacks),
                     )
                     .add_systems(
-                        Update,
+                        First,
                         run_steam_callbacks.in_set(SteamworksSystem::RunCallbacks),
                     )
-                    .add_systems(Update, flush_events.in_set(SteamworksSystem::FlushEvents));
+                    .add_systems(First, flush_events.in_set(SteamworksSystem::FlushEvents));
             }
         }
     }
@@ -213,16 +211,17 @@ impl Plugin for SteamworksPlugin {
 /// [`SystemSet`]: bevy_ecs::schedule::SystemSet
 #[derive(Debug, Clone, Copy, Eq, Hash, SystemSet, PartialEq)]
 pub enum SteamworksSystem {
-    /// A system that runs the Steam SDK callbacks. Anything dependent on
-    /// Steam API results should run after this. This runs in
+    /// A system set that runs the Steam SDK callbacks. Anything dependent on
+    /// Steam API results should scheduled after this. This runs in
     /// [`First`].
     RunCallbacks,
-    /// A set of systems for flushing events from the Steam SDK into bevy.
-    /// If using [`EventReader`] with any of these events, it should be
-    /// scheduled after these systems. These systems run in
-    /// [`PreUpdate`].
+    /// A system set for flushing events from the Steam SDK into bevy.
+    /// If using a [`EventReader`] with [`SteamworksEvent`], it should be
+    /// scheduled after this. This system set runs in
+    /// [`First`] after [`RunCallbacks`].
     ///
     /// [`EventReader`]: bevy_ecs::event::EventReader
+    /// [`RunCallbacks`]: SteamworksSystem::RunCallbacks
     FlushEvents,
 }
 
