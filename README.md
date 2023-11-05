@@ -38,7 +38,7 @@ fn main() {
   // Use the demo Steam AppId for SpaceWar
   App::new()
       .add_plugins(DefaultPlugins)
-      .add_plugin(SteamworksPlugin::new(AppId(480)))
+      .add_plugins(SteamworksPlugin::new(AppId(480)))
       .run()
 }
 ```
@@ -73,7 +73,7 @@ fn main() {
   // Use the demo Steam AppId for SpaceWar
   App::new()
       .add_plugins(DefaultPlugins)
-      .add_plugin(SteamworksPlugin::new(AppId(480)))
+      .add_plugins(SteamworksPlugin::new(AppId(480)))
       .add_startup_system(steam_system)
       .run()
 }
