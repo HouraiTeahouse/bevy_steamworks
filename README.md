@@ -18,6 +18,13 @@ bevy-steamworks = "0.9"
 The steamworks crate comes bundled with the redistributable dynamic libraries
 of a compatible version of the SDK. Currently it's v153a.
 
+If you wish to enable serde support add the following:
+
+```toml
+[dependencies]
+bevy-steamworks = { version = "0.9", features = ["serde"] }
+```
+
 ## Usage
 
 To add the plugin to your app, simply add the `SteamworksPlugin` to your
