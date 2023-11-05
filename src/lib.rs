@@ -191,8 +191,8 @@ impl Plugin for SteamworksPlugin {
                     ))
                     .insert_non_send_resource(single)
                     .add_event::<SteamworksEvent>()
-                    .configure_set(First, SteamworksSystem::RunCallbacks)
-                    .configure_set(
+                    .configure_sets(First, SteamworksSystem::RunCallbacks)
+                    .configure_sets(
                         First,
                         SteamworksSystem::FlushEvents.after(SteamworksSystem::RunCallbacks),
                     )
