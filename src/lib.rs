@@ -30,7 +30,7 @@
 //! any asynchronous callbacks from Steam will only run on the main thread.
 //!
 //! The plugin will automatically call [`SingleClient::run_callbacks`] on the Bevy
-//! main thread every frame in [`CoreStage::First`], so there is no need to run it
+//! main thread every frame in [`First`], so there is no need to run it
 //! manually.
 //!
 //! **NOTE**: If the plugin fails to initialize (i.e. `Client::init()` fails and
