@@ -55,7 +55,7 @@
 //!   App::new()
 //!       .add_plugins(DefaultPlugins)
 //!       .add_plugins(SteamworksPlugin::new(AppId(480)))
-//!       .add_startup_system(steam_system)
+//!       .add_systems(Startup, steam_system)
 //!       .run()
 //! }
 //! ```
