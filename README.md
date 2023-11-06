@@ -12,11 +12,18 @@ Add the following to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-bevy-steamworks = "0.8"
+bevy-steamworks = "0.9"
 ```
 
 The steamworks crate comes bundled with the redistributable dynamic libraries
 of a compatible version of the SDK. Currently it's v153a.
+
+If you wish to enable serde support add the following:
+
+```toml
+[dependencies]
+bevy-steamworks = { version = "0.9", features = ["serde"] }
+```
 
 ## Usage
 
@@ -31,7 +38,7 @@ fn main() {
   // Use the demo Steam AppId for SpaceWar
   App::new()
       .add_plugins(DefaultPlugins)
-      .add_plugin(SteamworksPlugin::new(AppId(480)))
+      .add_plugins(SteamworksPlugin::new(AppId(480)))
       .run()
 }
 ```
@@ -42,7 +49,7 @@ and can be used to make requests via the SDK from any of Bevy's threads. However
 any asynchronous callbacks from Steam will only run on the main thread.
 
 The plugin will automatically call `SingleClient::run_callbacks` on the Bevy
-main thread every frame in `CoreStage::First`, so there is no need to run it
+main thread every frame in `First`, so there is no need to run it
 manually.
 
 **NOTE**: If the plugin fails to initialize (i.e. `Client::init()` fails and
@@ -66,8 +73,8 @@ fn main() {
   // Use the demo Steam AppId for SpaceWar
   App::new()
       .add_plugins(DefaultPlugins)
-      .add_plugin(SteamworksPlugin::new(AppId(480)))
-      .add_startup_system(steam_system)
+      .add_plugins(SteamworksPlugin::new(AppId(480)))
+      .add_systems(Startup, steam_system)
       .run()
 }
 ```
@@ -76,6 +83,7 @@ fn main() {
  
 |Bevy Version |bevy\_steamworks|
 |:------------|:---------------|
+|0.12         |0.9             |
 |0.11         |0.8             |
 |0.10         |0.7             |
 |0.9          |0.6             |

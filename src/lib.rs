@@ -19,7 +19,7 @@
 //!   // Use the demo Steam AppId for SpaceWar
 //!   App::new()
 //!       .add_plugins(DefaultPlugins)
-//!       .add_plugin(SteamworksPlugin::new(AppId(480)))
+//!       .add_plugins(SteamworksPlugin::new(AppId(480)))
 //!       .run()
 //! }
 //! ```
@@ -30,7 +30,7 @@
 //! any asynchronous callbacks from Steam will only run on the main thread.
 //!
 //! The plugin will automatically call [`SingleClient::run_callbacks`] on the Bevy
-//! main thread every frame in [`CoreStage::First`], so there is no need to run it
+//! main thread every frame in [`First`], so there is no need to run it
 //! manually.
 //!
 //! **NOTE**: If the plugin fails to initialize (i.e. `Client::init()` fails and
@@ -54,8 +54,8 @@
 //!   // Use the demo Steam AppId for SpaceWar
 //!   App::new()
 //!       .add_plugins(DefaultPlugins)
-//!       .add_plugin(SteamworksPlugin::new(AppId(480)))
-//!       .add_startup_system(steam_system)
+//!       .add_plugins(SteamworksPlugin::new(AppId(480)))
+//!       .add_systems(Startup, steam_system)
 //!       .run()
 //! }
 //! ```
@@ -191,8 +191,8 @@ impl Plugin for SteamworksPlugin {
                     ))
                     .insert_non_send_resource(single)
                     .add_event::<SteamworksEvent>()
-                    .configure_set(First, SteamworksSystem::RunCallbacks)
-                    .configure_set(
+                    .configure_sets(First, SteamworksSystem::RunCallbacks)
+                    .configure_sets(
                         First,
                         SteamworksSystem::FlushEvents.after(SteamworksSystem::RunCallbacks),
                     )
