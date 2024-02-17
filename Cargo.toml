@@ -13,11 +13,11 @@ default = []
 serde = ["steamworks/serde"]
 
 [dependencies]
-bevy_log = "0.12"
-bevy_app = "0.12"
-bevy_ecs = "0.12"
-bevy_utils = "0.12"
-steamworks = "0.10"
+bevy_log = { git = "https://github.com/bevyengine/bevy", branch = "main" }
+bevy_app = { git = "https://github.com/bevyengine/bevy", branch = "main" }
+bevy_ecs = { git = "https://github.com/bevyengine/bevy", branch = "main" }
+bevy_utils = { git = "https://github.com/bevyengine/bevy", branch = "main" }
+steamworks = "0.11"
 
 [dev-dependencies]
 bevy = "0.12"
