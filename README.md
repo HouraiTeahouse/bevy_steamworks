@@ -12,11 +12,11 @@ Add the following to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-bevy-steamworks = "0.9"
+bevy-steamworks = "0.10"
 ```
 
 The steamworks crate comes bundled with the redistributable dynamic libraries
-of a compatible version of the SDK. Currently it's v153a.
+of a compatible version of the SDK. Currently it's v158a.
 
 If you wish to enable serde support add the following:
 
@@ -83,6 +83,7 @@ fn main() {
  
 |Bevy Version |bevy\_steamworks|
 |:------------|:---------------|
+|0.13         |0.10            |
 |0.12         |0.9             |
 |0.11         |0.8             |
 |0.10         |0.7             |
