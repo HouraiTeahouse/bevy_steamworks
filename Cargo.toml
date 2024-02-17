@@ -1,10 +1,10 @@
 [package]
-name = "bevy-steamworks"
+name = "bevy_steamworks"
 version = "0.10.0"
 authors = ["james7132 <contact@jamessliu.com>"]
 edition = "2021"
 description = "A Bevy plugin for integrating with the Steamworks SDK."
-repository = "https://github.com/HouraiTeahouse/bevy-steamworks"
+repository = "https://github.com/HouraiTeahouse/bevy_steamworks"
 license = "MIT OR Apache-2.0"
 keywords = ["bevy", "gamedev", "steam"]
 
