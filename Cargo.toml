@@ -4,7 +4,7 @@ version = "0.10.0"
 authors = ["james7132 <contact@jamessliu.com>"]
 edition = "2021"
 description = "A Bevy plugin for integrating with the Steamworks SDK."
-repository = "https://github.com/james7132/bevy-steamworks"
+repository = "https://github.com/HouraiTeahouse/bevy-steamworks"
 license = "MIT OR Apache-2.0"
 keywords = ["bevy", "gamedev", "steam"]
 
@@ -13,11 +13,11 @@ default = []
 serde = ["steamworks/serde"]
 
 [dependencies]
-bevy_log = { git = "https://github.com/bevyengine/bevy", branch = "main" }
-bevy_app = { git = "https://github.com/bevyengine/bevy", branch = "main" }
-bevy_ecs = { git = "https://github.com/bevyengine/bevy", branch = "main" }
-bevy_utils = { git = "https://github.com/bevyengine/bevy", branch = "main" }
+bevy_log = "0.13"
+bevy_app = "0.13"
+bevy_ecs = "0.13"
+bevy_utils = "0.13"
 steamworks = "0.11"
 
 [dev-dependencies]
-bevy = "0.12"
+bevy = "0.13"
