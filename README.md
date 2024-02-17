@@ -1,8 +1,8 @@
-# bevy_steamworks
+# bevy-steamworks
 
-[![crates.io](https://img.shields.io/crates/v/bevy_steamworks.svg)](https://crates.io/crates/bevy_steamworks)
-[![Documentation](https://docs.rs/bevy_steamworks/badge.svg)](https://docs.rs/bevy_steamworks)
-![License](https://img.shields.io/crates/l/bevy_steamworks.svg)
+[![crates.io](https://img.shields.io/crates/v/bevy-steamworks.svg)](https://crates.io/crates/bevy-steamworks)
+[![Documentation](https://docs.rs/bevy-steamworks/badge.svg)](https://docs.rs/bevy-steamworks)
+![License](https://img.shields.io/crates/l/bevy-steamworks.svg)
 
 This crate provides a [Bevy](https://bevyengine.org/) plugin for integrating with
 the Steamworks SDK.
@@ -12,7 +12,7 @@ Add the following to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-bevy_steamworks = "0.10"
+bevy-steamworks = "0.10"
 ```
 
 The steamworks crate comes bundled with the redistributable dynamic libraries
@@ -22,7 +22,7 @@ If you wish to enable serde support add the following:
 
 ```toml
 [dependencies]
-bevy_steamworks = { version = "0.9", features = ["serde"] }
+bevy-steamworks = { version = "0.9", features = ["serde"] }
 ```
 
 ## Usage
