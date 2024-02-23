@@ -1,6 +1,6 @@
 [package]
 name = "bevy-steamworks"
-version = "0.10.0"
+version = "0.10.1"
 authors = ["james7132 <contact@jamessliu.com>"]
 edition = "2021"
 description = "A Bevy plugin for integrating with the Steamworks SDK."

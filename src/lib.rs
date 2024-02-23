@@ -18,8 +18,9 @@
 //! fn main() {
 //!   // Use the demo Steam AppId for SpaceWar
 //!   App::new()
+//!       // it is important to add the plugin before `RenderPlugin` that comes with `DefaultPlugins`
+//!       .add_plugins(SteamworksPlugin::init_app(480).unwrap())
 //!       .add_plugins(DefaultPlugins)
-//!       .add_plugins(SteamworksPlugin::new(AppId(480)))
 //!       .run()
 //! }
 //! ```
@@ -53,14 +54,18 @@
 //! fn main() {
 //!   // Use the demo Steam AppId for SpaceWar
 //!   App::new()
+//!       // it is important to add the plugin before `RenderPlugin` that comes with `DefaultPlugins`
+//!       .add_plugins(SteamworksPlugin::init_app(480).unwrap())
 //!       .add_plugins(DefaultPlugins)
-//!       .add_plugins(SteamworksPlugin::new(AppId(480)))
 //!       .add_systems(Startup, steam_system)
 //!       .run()
 //! }
 //! ```
 
-use std::{ops::Deref, sync::Arc};
+use std::{
+    ops::Deref,
+    sync::{Arc, Mutex},
+};
 
 use bevy_app::{App, First, Plugin};
 use bevy_ecs::{
@@ -163,54 +168,61 @@ impl Deref for Client {
 }
 
 /// A Bevy [`Plugin`] for adding support for the Steam SDK.
-pub struct SteamworksPlugin(AppId);
+pub struct SteamworksPlugin {
+    steam: Mutex<Option<(steamworks::Client, SingleClient)>>,
+}
 
 impl SteamworksPlugin {
     /// Creates a new `SteamworksPlugin`. The provided `app_id` should correspond
     /// to the Steam app ID provided by Valve.
-    pub fn new(app_id: impl Into<AppId>) -> Self {
-        Self(app_id.into())
+    pub fn init_app(app_id: impl Into<AppId>) -> Result<Self, SteamAPIInitError> {
+        Ok(Self {
+            steam: Mutex::new(Some(steamworks::Client::init_app(app_id.into())?)),
+        })
+    }
+
+    /// Creates a new `SteamworksPlugin` using the automatically determined app ID.
+    /// If the game isn't being run through steam this can be provided by placing a steam_appid.txt
+    /// with the ID inside in the current working directory.
+    /// Alternatively, you can use `SteamworksPlugin::init_app(<app_id>)` to force a specific app ID.
+    pub fn init() -> Result<Self, SteamAPIInitError> {
+        Ok(Self {
+            steam: Mutex::new(Some(steamworks::Client::init()?)),
+        })
     }
 }
 
 impl Plugin for SteamworksPlugin {
     fn build(&self, app: &mut App) {
-        if app.world.contains_resource::<Client>() {
-            bevy_log::warn!("Attempted to add the Steamworks plugin multiple times!");
-            return;
-        }
-        match steamworks::Client::init_app(self.0) {
-            Err(err) => bevy_log::error!("Failed to initialize Steamworks client: {}", err),
-            Ok((client, single)) => {
-                app.insert_resource(Client(client.clone()))
-                    .insert_resource(register_event_callbacks!(
-                        client,
-                        AuthSessionTicketResponse,
-                        DownloadItemResult,
-                        GameLobbyJoinRequested,
-                        LobbyChatUpdate,
-                        P2PSessionConnectFail,
-                        P2PSessionRequest,
-                        PersonaStateChange,
-                        SteamServerConnectFailure,
-                        SteamServersConnected,
-                        SteamServersDisconnected,
-                        UserAchievementStored,
-                        UserStatsReceived,
-                        UserStatsStored,
-                        ValidateAuthTicketResponse
-                    ))
-                    .insert_non_send_resource(single)
-                    .add_event::<SteamworksEvent>()
-                    .configure_sets(First, SteamworksSystem::RunCallbacks)
-                    .add_systems(
-                        First,
-                        run_steam_callbacks
-                            .in_set(SteamworksSystem::RunCallbacks)
-                            .before(bevy_ecs::event::EventUpdates),
-                    );
-            }
-        }
+        let (client, single) = self.steam.lock().unwrap().take().unwrap();
+
+        app.insert_resource(Client(client.clone()))
+            .insert_resource(register_event_callbacks!(
+                client,
+                AuthSessionTicketResponse,
+                DownloadItemResult,
+                GameLobbyJoinRequested,
+                LobbyChatUpdate,
+                P2PSessionConnectFail,
+                P2PSessionRequest,
+                PersonaStateChange,
+                SteamServerConnectFailure,
+                SteamServersConnected,
+                SteamServersDisconnected,
+                UserAchievementStored,
+                UserStatsReceived,
+                UserStatsStored,
+                ValidateAuthTicketResponse
+            ))
+            .insert_non_send_resource(single)
+            .add_event::<SteamworksEvent>()
+            .configure_sets(First, SteamworksSystem::RunCallbacks)
+            .add_systems(
+                First,
+                run_steam_callbacks
+                    .in_set(SteamworksSystem::RunCallbacks)
+                    .before(bevy_ecs::event::EventUpdates),
+            );
     }
 }
 
