@@ -37,8 +37,9 @@ use bevy_steamworks::*;
 fn main() {
   // Use the demo Steam AppId for SpaceWar
   App::new()
+      // it is important to add the plugin before `RenderPlugin` that comes with `DefaultPlugins`
+      .add_plugins(SteamworksPlugin::init_app(480).unwrap())
       .add_plugins(DefaultPlugins)
-      .add_plugins(SteamworksPlugin::new(AppId(480)))
       .run()
 }
 ```
@@ -72,8 +73,9 @@ fn steam_system(steam_client: Res<Client>) {
 fn main() {
   // Use the demo Steam AppId for SpaceWar
   App::new()
+      // it is important to add the plugin before `RenderPlugin` that comes with `DefaultPlugins`
+      .add_plugins(SteamworksPlugin::init_app(480).unwrap())
       .add_plugins(DefaultPlugins)
-      .add_plugins(SteamworksPlugin::new(AppId(480)))
       .add_systems(Startup, steam_system)
       .run()
 }
