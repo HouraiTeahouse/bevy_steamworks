@@ -190,7 +190,12 @@ impl SteamworksPlugin {
 
 impl Plugin for SteamworksPlugin {
     fn build(&self, app: &mut App) {
-        let (client, single) = self.steam.lock().unwrap().take().unwrap();
+        let (client, single) = self
+            .steam
+            .lock()
+            .unwrap()
+            .take()
+            .expect("The SteamworksPlugin was initialized more than once");
 
         app.insert_resource(Client(client.clone()))
             .insert_resource(SingleClient(SyncCell::new(single)))
