@@ -72,9 +72,9 @@ use bevy_ecs::{
     event::EventWriter,
     prelude::Event,
     schedule::*,
-    system::{NonSend, Res, Resource},
+    system::{Res, ResMut, Resource},
 };
-use bevy_utils::syncunsafecell::SyncUnsafeCell;
+use bevy_utils::{synccell::SyncCell, syncunsafecell::SyncUnsafeCell};
 // Reexport everything from steamworks except for the clients
 pub use steamworks::{
     networking_messages, networking_sockets, networking_utils, restart_app_if_necessary, AccountId,
@@ -92,14 +92,13 @@ pub use steamworks::{
     P2PSessionRequest, PersonaChange, PersonaStateChange, PublishedFileId, PublishedFileVisibility,
     QueryHandle, QueryResult, QueryResults, RemotePlay, RemotePlayConnected,
     RemotePlayDisconnected, RemotePlaySession, RemotePlaySessionId, RemoteStorage, SIResult,
-    SResult, SendType, Server, ServerManager, ServerMode, SingleClient, SteamAPIInitError,
-    SteamDeviceFormFactor, SteamError, SteamFile, SteamFileInfo, SteamFileReader, SteamFileWriter,
-    SteamId, SteamServerConnectFailure, SteamServersConnected, SteamServersDisconnected,
-    StringFilter, StringFilterKind, StringFilters, TicketForWebApiResponse, UGCContentDescriptorID,
-    UGCQueryType, UGCStatisticType, UGCType, UpdateHandle, UpdateStatus, UpdateWatchHandle,
-    UploadScoreMethod, User, UserAchievementStored, UserList, UserListOrder, UserRestriction,
-    UserStats, UserStatsReceived, UserStatsStored, Utils, ValidateAuthTicketResponse,
-    RESULTS_PER_PAGE, UGC,
+    SResult, SendType, Server, ServerManager, ServerMode, SteamAPIInitError, SteamDeviceFormFactor,
+    SteamError, SteamFile, SteamFileInfo, SteamFileReader, SteamFileWriter, SteamId,
+    SteamServerConnectFailure, SteamServersConnected, SteamServersDisconnected, StringFilter,
+    StringFilterKind, StringFilters, TicketForWebApiResponse, UGCContentDescriptorID, UGCQueryType,
+    UGCStatisticType, UGCType, UpdateHandle, UpdateStatus, UpdateWatchHandle, UploadScoreMethod,
+    User, UserAchievementStored, UserList, UserListOrder, UserRestriction, UserStats,
+    UserStatsReceived, UserStatsStored, Utils, ValidateAuthTicketResponse, RESULTS_PER_PAGE, UGC,
 };
 
 #[derive(Resource)]
@@ -167,9 +166,12 @@ impl Deref for Client {
     }
 }
 
+#[derive(Resource)]
+struct SingleClient(SyncCell<steamworks::SingleClient>);
+
 /// A Bevy [`Plugin`] for adding support for the Steam SDK.
 pub struct SteamworksPlugin {
-    steam: Mutex<Option<(steamworks::Client, SingleClient)>>,
+    steam: Mutex<Option<(steamworks::Client, steamworks::SingleClient)>>,
 }
 
 impl SteamworksPlugin {
@@ -197,6 +199,7 @@ impl Plugin for SteamworksPlugin {
         let (client, single) = self.steam.lock().unwrap().take().unwrap();
 
         app.insert_resource(Client(client.clone()))
+            .insert_resource(SingleClient(SyncCell::new(single)))
             .insert_resource(register_event_callbacks!(
                 client,
                 AuthSessionTicketResponse,
@@ -214,7 +217,6 @@ impl Plugin for SteamworksPlugin {
                 UserStatsStored,
                 ValidateAuthTicketResponse
             ))
-            .insert_non_send_resource(single)
             .add_event::<SteamworksEvent>()
             .configure_sets(First, SteamworksSystem::RunCallbacks)
             .add_systems(
@@ -238,11 +240,11 @@ pub enum SteamworksSystem {
 }
 
 fn run_steam_callbacks(
-    client: NonSend<SingleClient>,
+    mut client: ResMut<SingleClient>,
     events: Res<SteamEvents>,
     mut output: EventWriter<SteamworksEvent>,
 ) {
-    client.run_callbacks();
+    client.0.get().run_callbacks();
     // SAFETY: The callback is only called during `run_steam_callbacks` which cannot run
     // while any of the flush_events systems are running. The system is registered only once for
     // the client. This cannot alias.
