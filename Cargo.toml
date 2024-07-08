@@ -16,7 +16,7 @@ serde = ["steamworks/serde"]
 bevy_log = "0.13"
 bevy_app = "0.13"
 bevy_ecs = "0.13"
-bevy_utils = "0.13"
+bevy_utils = "0.14"
 steamworks = "0.11"
 
 [dev-dependencies]
