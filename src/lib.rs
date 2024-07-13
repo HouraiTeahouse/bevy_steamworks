@@ -21,7 +21,7 @@
 //!       // it is important to add the plugin before `RenderPlugin` that comes with `DefaultPlugins`
 //!       .add_plugins(SteamworksPlugin::init_app(480).unwrap())
 //!       .add_plugins(DefaultPlugins)
-//!       .run()
+//!       .run();
 //! }
 //! ```
 //!
@@ -52,7 +52,7 @@
 //!       .add_plugins(SteamworksPlugin::init_app(480).unwrap())
 //!       .add_plugins(DefaultPlugins)
 //!       .add_systems(Startup, steam_system)
-//!       .run()
+//!       .run();
 //! }
 //! ```
 
