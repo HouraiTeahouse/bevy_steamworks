@@ -16,7 +16,7 @@ fn main() {
     // Use the demo Steam AppId for SpaceWar
     App::new()
         // it is important to add the plugin before `RenderPlugin` that comes with `DefaultPlugins`
-        .add_plugins(SteamworksPlugin::init_app(480).unwrap())
+        .add_plugins(SteamworksPlugin::init_app(480).expect("Steam is not currently running. Make sure to handle this possibility if you want to allow running without Steam!"))
         .add_plugins(DefaultPlugins)
         .add_systems(Startup, steam_system)
         .run();
