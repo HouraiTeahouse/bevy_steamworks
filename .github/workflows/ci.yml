@@ -1,6 +1,6 @@
 name: CI
 
-on: [push, pull_request]
+on: [push, pull_request, workflow_dispatch]
 
 env:
   CARGO_TERM_COLOR: always
@@ -8,23 +8,29 @@ env:
 jobs:
   build:
     strategy:
+      fail-fast: false
       matrix:
         os: [windows-latest, ubuntu-latest, macos-latest]
-        toolchain: [stable]
+        toolchain: [stable, nightly]
+        op: [build, test, clippy]
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v2
 
-      - uses: dtolnay/rust-toolchain@stable
+      - uses: actions-rs/toolchain@v1
+        id: toolchain
         with:
+          toolchain: ${{ matrix.toolchain }}
+          profile: minimal
           components: rustfmt, clippy
+          override: true
 
       - name: Install alsa and udev
         run: sudo apt-get update; sudo apt-get install --no-install-recommends libasound2-dev libudev-dev
         if: runner.os == 'linux'
 
       - name: Setup cache
-        uses: actions/cache@v4
+        uses: actions/cache@v2
         with:
           path: |
             ~/.cargo/registry
@@ -32,10 +38,15 @@ jobs:
             target
           key: ${{ runner.os }}-test-rustc-${{ steps.toolchain.outputs.rustc_hash }}-${{ hashFiles('**/Cargo.lock') }}
 
-      - run: cargo fmt --all -- --check
+      - uses: actions-rs/cargo@v1
         if: runner.os == 'linux'
+        with:
+          command: fmt
+          args: --all -- --check
 
-      - run: cargo clippy --all-features
-        if: runner.os == 'linux'
-
-      - run: cargo test  --workspace
+      - uses: actions-rs/cargo@v1
+        with:
+          command: ${{ matrix.op }}
+        env:
+          CARGO_INCREMENTAL: 0
+          RUSTFLAGS: "-C debuginfo=0"
