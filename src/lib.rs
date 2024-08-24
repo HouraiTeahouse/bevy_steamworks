@@ -60,11 +60,10 @@ use std::{
     ops::Deref,
     sync::{Arc, Mutex},
 };
-
+use bevy::prelude::Event;
 use bevy_app::{App, First, Plugin};
 use bevy_ecs::{
     event::EventWriter,
-    prelude::Event,
     schedule::*,
     system::{Res, ResMut, Resource},
 };
