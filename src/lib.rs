@@ -202,6 +202,7 @@ impl Plugin for SteamworksPlugin {
                 DownloadItemResult,
                 GameLobbyJoinRequested,
                 LobbyChatUpdate,
+                LobbyChatMsg,
                 P2PSessionConnectFail,
                 P2PSessionRequest,
                 PersonaStateChange,
