@@ -60,13 +60,13 @@ use std::{
     ops::Deref,
     sync::{Arc, Mutex},
 };
-use bevy::prelude::Event;
 use bevy_app::{App, First, Plugin};
 use bevy_ecs::{
     event::EventWriter,
     schedule::*,
     system::{Res, ResMut, Resource},
 };
+use bevy::ecs::event::Event;
 use bevy_utils::{syncunsafecell::SyncUnsafeCell};
 // Reexport everything from steamworks except for the clients
 pub use steamworks::{
