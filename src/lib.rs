@@ -108,6 +108,7 @@ pub enum SteamworksEvent {
     DownloadItemResult(steamworks::DownloadItemResult),
     GameLobbyJoinRequested(steamworks::GameLobbyJoinRequested),
     LobbyChatUpdate(steamworks::LobbyChatUpdate),
+    LobbyChatMsg(steamworks::LobbyChatMsg),
     P2PSessionConnectFail(steamworks::P2PSessionConnectFail),
     P2PSessionRequest(steamworks::P2PSessionRequest),
     PersonaStateChange(steamworks::PersonaStateChange),
