@@ -66,7 +66,7 @@ use bevy_ecs::{
     schedule::*,
     system::{Res, ResMut, Resource},
 };
-use bevy::ecs::event::Event;
+use bevy_ecs::event::Event;
 use bevy_utils::{syncunsafecell::SyncUnsafeCell};
 // Reexport everything from steamworks except for the clients
 pub use steamworks::{
