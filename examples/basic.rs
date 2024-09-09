@@ -19,5 +19,5 @@ fn main() {
         .add_plugins(SteamworksPlugin::init_app(480).unwrap())
         .add_plugins(DefaultPlugins)
         .add_systems(Startup, steam_system)
-        .run()
+        .run();
 }
