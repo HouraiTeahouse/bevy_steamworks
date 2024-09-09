@@ -1,6 +1,6 @@
 [package]
 name = "bevy-steamworks"
-version = "0.11.0"
+version = "0.12.0"
 authors = ["james7132 <contact@jamessliu.com>"]
 edition = "2021"
 description = "A Bevy plugin for integrating with the Steamworks SDK."
@@ -17,7 +17,7 @@ bevy_log = "0.14"
 bevy_app = "0.14"
 bevy_ecs = "0.14"
 bevy_utils = "0.14"
-steamworks = { git = "https://github.com/Noxime/steamworks-rs.git", tag="v0.11.0"}
+steamworks = "0.11"
 
 [dev-dependencies]
 bevy = "0.14"
