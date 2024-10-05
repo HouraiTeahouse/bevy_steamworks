@@ -1,8 +1,10 @@
 # bevy-steamworks
 
+<!-- 
+These Badges are from original repo, they're not really mine to use
 [![crates.io](https://img.shields.io/crates/v/bevy-steamworks.svg)](https://crates.io/crates/bevy-steamworks)
 [![Documentation](https://docs.rs/bevy-steamworks/badge.svg)](https://docs.rs/bevy-steamworks)
-![License](https://img.shields.io/crates/l/bevy-steamworks.svg)
+![License](https://img.shields.io/crates/l/bevy-steamworks.svg) -->
 
 This crate provides a [Bevy](https://bevyengine.org/) plugin for integrating with
 the Steamworks SDK.
@@ -12,8 +14,10 @@ Add the following to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-bevy-steamworks = "0.11"
+bevy-steamworks = { git = "https://github.com/QueenOfSquiggles/bevy_steamworks" }
 ```
+
+optionally you can add `rev="<commit>"` or `rev="<tag>"` to specify a specific version of the repo without worry of sudden changes. Though the goal is to keep the repo's main branch relatively stable with minimal API changes.
 
 The steamworks crate comes bundled with the redistributable dynamic libraries
 of a compatible version of the SDK. Currently it's v158a.
@@ -22,7 +26,7 @@ If you wish to enable serde support add the following:
 
 ```toml
 [dependencies]
-bevy-steamworks = { version = "0.9", features = ["serde"] }
+bevy-steamworks = { git = "https://github.com/QueenOfSquiggles/bevy_steamworks", features = ["serde"] }
 ```
 
 ## Usage
@@ -79,12 +83,4 @@ fn main() {
  
 |Bevy Version |bevy\_steamworks|
 |:------------|:---------------|
-|0.13         |0.10, 0.11      |
-|0.12         |0.9             |
-|0.11         |0.8             |
-|0.10         |0.7             |
-|0.9          |0.6             |
-|0.8          |0.5             |
-|0.7          |0.4             |
-|0.6          |0.2, 0.3        |
-|0.5          |0.1             |
+|0.14.*         | main      |
