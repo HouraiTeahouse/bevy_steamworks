@@ -56,18 +56,18 @@
 //! }
 //! ```
 
-use std::{
-    ops::Deref,
-    sync::{Arc, Mutex},
-};
 use bevy_app::{App, First, Plugin};
+use bevy_ecs::event::Event;
 use bevy_ecs::{
     event::EventWriter,
     schedule::*,
     system::{Res, ResMut, Resource},
 };
-use bevy_ecs::event::Event;
-use bevy_utils::{syncunsafecell::SyncUnsafeCell};
+use bevy_utils::syncunsafecell::SyncUnsafeCell;
+use std::{
+    ops::Deref,
+    sync::{Arc, Mutex},
+};
 // Reexport everything from steamworks except for the clients
 pub use steamworks::{
     networking_messages, networking_sockets, networking_utils, restart_app_if_necessary, AccountId,
