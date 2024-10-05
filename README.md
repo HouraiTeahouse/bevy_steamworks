@@ -14,7 +14,7 @@ Add the following to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-bevy-steamworks = { git = "https://github.com/QueenOfSquiggles/bevy_steamworks" }
+bevy-steamworks = { git = "https://github.com/QueenOfSquiggles/bevy_steamworks.git" }
 ```
 
 optionally you can add `rev="<commit>"` or `rev="<tag>"` to specify a specific version of the repo without worry of sudden changes. Though the goal is to keep the repo's main branch relatively stable with minimal API changes.
@@ -26,7 +26,7 @@ If you wish to enable serde support add the following:
 
 ```toml
 [dependencies]
-bevy-steamworks = { git = "https://github.com/QueenOfSquiggles/bevy_steamworks", features = ["serde"] }
+bevy-steamworks = { git = "https://github.com/QueenOfSquiggles/bevy_steamworks.git", features = ["serde"] }
 ```
 
 ## Usage
