@@ -51,7 +51,7 @@ and can be used to make requests via the SDK from any of Bevy's threads.
 The plugin will automatically call `SingleClient::run_callbacks` on the Bevy
 every tick in the `First` schedule, so there is no need to run it manually.
 
-All callbacks are forwarded as `Events` and can be listened to in the a
+All callbacks are forwarded as `Events` and can be listened to in a
 Bevy idiomatic way:
 
 ```rust no_run
