@@ -30,7 +30,7 @@
 //! and can be used to make requests via the SDK from any of Bevy's threads.
 //!
 //! The plugin will automatically call `SingleClient::run_callbacks` on the Bevy
-//! every tick in the `First` schedule, so there is no need to run it manually.  
+//! every tick in the `First` schedule, so there is no need to run it manually.
 //!
 //! All callbacks are forwarded as `Events` and can be listened to in the a
 //! Bevy idiomatic way:
@@ -65,8 +65,9 @@ use bevy_app::{App, First, Plugin};
 use bevy_ecs::{
     event::EventWriter,
     prelude::Event,
+    resource::Resource,
     schedule::*,
-    system::{Res, ResMut, Resource},
+    system::{Res, ResMut},
 };
 use bevy_utils::{synccell::SyncCell, syncunsafecell::SyncUnsafeCell};
 // Reexport everything from steamworks except for the clients
@@ -251,6 +252,6 @@ fn run_steam_callbacks(
     // the client. This cannot alias.
     let pending = unsafe { &mut *events.pending.get() };
     if !pending.is_empty() {
-        output.send_batch(pending.drain(0..));
+        output.write_batch(pending.drain(0..));
     }
 }
