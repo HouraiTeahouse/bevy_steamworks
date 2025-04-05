@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use bevy_steamworks::*;
 
-fn steam_system(steam_client: Res<Client>) {
+fn steam_system(steam_client: Res<SteamworksClient>) {
     for friend in steam_client.friends().get_friends(FriendFlags::IMMEDIATE) {
         println!(
             "Friend: {:?} - {}({:?})",
