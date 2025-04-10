@@ -13,11 +13,11 @@ default = []
 serde = ["steamworks/serde"]
 
 [dependencies]
-bevy_log = "0.14"
-bevy_app = "0.14"
-bevy_ecs = "0.14"
-bevy_utils = "0.14"
+bevy_log = "0.15"
+bevy_app = "0.15"
+bevy_ecs = "0.15"
+bevy_utils = "0.15"
 steamworks = "0.11"
 
 [dev-dependencies]
-bevy = "0.14"
+bevy = "0.15"
