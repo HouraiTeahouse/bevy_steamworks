@@ -152,9 +152,9 @@ macro_rules! register_event_callbacks {
 ///
 /// For more information on how to use it, see [`steamworks::Client`].
 #[derive(Resource, Clone)]
-pub struct Client(steamworks::Client);
+pub struct SteamworksClient(steamworks::Client);
 
-impl Deref for Client {
+impl Deref for SteamworksClient {
     type Target = steamworks::Client;
     fn deref(&self) -> &Self::Target {
         &self.0
@@ -162,7 +162,7 @@ impl Deref for Client {
 }
 
 #[derive(Resource)]
-struct SingleClient(SyncCell<steamworks::SingleClient>);
+struct SteamworksSingleClient(SyncCell<steamworks::SingleClient>);
 
 /// A Bevy [`Plugin`] for adding support for the Steam SDK.
 pub struct SteamworksPlugin {
@@ -198,8 +198,8 @@ impl Plugin for SteamworksPlugin {
             .take()
             .expect("The SteamworksPlugin was initialized more than once");
 
-        app.insert_resource(Client(client.clone()))
-            .insert_resource(SingleClient(SyncCell::new(single)))
+        app.insert_resource(SteamworksClient(client.clone()))
+            .insert_resource(SteamworksSingleClient(SyncCell::new(single)))
             .insert_resource(register_event_callbacks!(
                 client,
                 AuthSessionTicketResponse,
@@ -241,7 +241,7 @@ pub enum SteamworksSystem {
 }
 
 fn run_steam_callbacks(
-    mut client: ResMut<SingleClient>,
+    mut client: ResMut<SteamworksSingleClient>,
     events: Res<SteamEvents>,
     mut output: EventWriter<SteamworksEvent>,
 ) {
