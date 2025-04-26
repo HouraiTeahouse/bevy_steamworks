@@ -165,9 +165,9 @@ macro_rules! register_event_callbacks {
 ///
 /// For more information on how to use it, see [`steamworks::Client`].
 #[derive(Resource, Clone)]
-pub struct SteamworksClient(steamworks::Client);
+pub struct Client(steamworks::Client);
 
-impl Deref for SteamworksClient {
+impl Deref for Client {
     type Target = steamworks::Client;
     fn deref(&self) -> &Self::Target {
         &self.0
@@ -208,7 +208,7 @@ impl Plugin for SteamworksPlugin {
             .take()
             .expect("The SteamworksPlugin was initialized more than once");
 
-        app.insert_resource(SteamworksClient(client.clone()))
+        app.insert_resource(Client(client.clone()))
             .insert_resource(register_event_callbacks!(
                 client,
                 single,
