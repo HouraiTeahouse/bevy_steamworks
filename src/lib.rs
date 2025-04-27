@@ -25,7 +25,7 @@
 //! }
 //! ```
 //!
-//! The plugin adds `SteamworksClient` as a Bevy ECS resource, which can be
+//! The plugin adds `Client` as a Bevy ECS resource, which can be
 //! accessed like any other resource in Bevy. The client implements `Send` and `Sync`
 //! and can be used to make requests via the SDK from any of Bevy's threads.
 //!
@@ -39,7 +39,7 @@
 //! use bevy::prelude::*;
 //! use bevy_steamworks::*;
 //!
-//! fn steam_system(steam_client: Res<SteamworksClient>) {
+//! fn steam_system(steam_client: Res<Client>) {
 //!   for friend in steam_client.friends().get_friends(FriendFlags::IMMEDIATE) {
 //!     println!("Friend: {:?} - {}({:?})", friend.id(), friend.name(), friend.state());
 //!   }
