@@ -99,7 +99,7 @@ pub use steamworks::{
 };
 
 /// A Bevy-compatible wrapper around various Steamworks events.
-#[derive(Event)]
+#[derive(Event, Debug)]
 #[allow(missing_docs)]
 pub enum SteamworksEvent {
     AuthSessionTicketResponse(AuthSessionTicketResponse),
