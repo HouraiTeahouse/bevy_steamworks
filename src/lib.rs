@@ -66,9 +66,9 @@ use bevy_ecs::{
     event::EventWriter,
     prelude::{Event, Resource},
     schedule::*,
-    system::ResMut,
+    system::{NonSend, ResMut},
 };
-use bevy_utils::{synccell::SyncCell, syncunsafecell::SyncUnsafeCell};
+use bevy_utils::syncunsafecell::SyncUnsafeCell;
 
 // Reexport everything from steamworks except for the clients
 use steamworks::networking_types::NetConnectionStatusChanged;
@@ -130,12 +130,11 @@ pub enum SteamworksEvent {
 #[derive(Resource)]
 struct SteamworksState {
     _callbacks: Vec<CallbackHandle>,
-    single_client: SyncCell<steamworks::SingleClient>,
     pending: Arc<SyncUnsafeCell<Vec<SteamworksEvent>>>,
 }
 
 macro_rules! register_event_callbacks {
-    ($client: ident, $single: ident, $($event_name: ident),+) => {
+    ($client: ident, $($event_name: ident),+) => {
         {
             let pending = Arc::new(SyncUnsafeCell::new(Vec::new()));
             SteamworksState {
@@ -151,7 +150,6 @@ macro_rules! register_event_callbacks {
                         })
                     }),+
                 ],
-                single_client: SyncCell::new($single),
                 pending,
             }
         }
@@ -176,15 +174,16 @@ impl Deref for Client {
 
 /// A Bevy [`Plugin`] for adding support for the Steam SDK.
 pub struct SteamworksPlugin {
-    steam: Mutex<Option<(steamworks::Client, steamworks::SingleClient)>>,
+    steam: Mutex<Option<(steamworks::Client, Option<steamworks::SingleClient>)>>,
 }
 
 impl SteamworksPlugin {
     /// Creates a new `SteamworksPlugin`. The provided `app_id` should correspond
     /// to the Steam app ID provided by Valve.
     pub fn init_app(app_id: impl Into<AppId>) -> Result<Self, SteamAPIInitError> {
+        let (client, single) = steamworks::Client::init_app(app_id.into())?;
         Ok(Self {
-            steam: Mutex::new(Some(steamworks::Client::init_app(app_id.into())?)),
+            steam: Mutex::new(Some((client, Some(single)))),
         })
     }
 
@@ -193,25 +192,46 @@ impl SteamworksPlugin {
     /// with the ID inside in the current working directory.
     /// Alternatively, you can use `SteamworksPlugin::init_app(<app_id>)` to force a specific app ID.
     pub fn init() -> Result<Self, SteamAPIInitError> {
+        let (client, single) = steamworks::Client::init()?;
         Ok(Self {
-            steam: Mutex::new(Some(steamworks::Client::init()?)),
+            steam: Mutex::new(Some((client, Some(single)))),
+        })
+    }
+
+    /// Initializes the plugin using an existing `steamworks::Client` and `steamworks::SingleClient`.
+    /// You have to add `single` manually as a non send resouce using `insert_non_send_resource`.
+    ///
+    /// # Example
+    /// ```
+    /// let (client, single) = steamworks::Client::init_app(480)?;
+    /// App::new()
+    ///     .add_plugins(SteamworksPlugin::with(client)?)
+    ///     .insert_non_send_resource(single)
+    ///     .run();
+    /// ```
+    pub fn with(client: steamworks::Client) -> Result<Self, SteamAPIInitError> {
+        Ok(Self {
+            steam: Mutex::new(Some((client, None))),
         })
     }
 }
 
 impl Plugin for SteamworksPlugin {
     fn build(&self, app: &mut App) {
-        let (client, single) = self
+        let (client, maybe_single) = self
             .steam
             .lock()
             .unwrap()
             .take()
             .expect("The SteamworksPlugin was initialized more than once");
 
+        if let Some(single) = maybe_single {
+            app.insert_non_send_resource(single);
+        }
+
         app.insert_resource(Client(client.clone()))
             .insert_resource(register_event_callbacks!(
                 client,
-                single,
                 AuthSessionTicketResponse,
                 DownloadItemResult,
                 FloatingGamepadTextInputDismissed,
@@ -259,10 +279,11 @@ pub enum SteamworksSystem {
 }
 
 fn run_steam_callbacks(
-    mut state: ResMut<SteamworksState>,
+    state: ResMut<SteamworksState>,
     mut output: EventWriter<SteamworksEvent>,
+    single: NonSend<steamworks::SingleClient>,
 ) {
-    state.single_client.get().run_callbacks();
+    single.run_callbacks();
     // SAFETY: The callback is only called during `run_steam_callbacks` which cannot run
     // while any of the flush_events systems are running. The system is registered only once for
     // the client. This cannot alias.
