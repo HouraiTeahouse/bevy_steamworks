@@ -1,4 +1,5 @@
 #![deny(missing_docs)]
+#![forbid(unsafe_code)]
 
 //! This crate provides a [Bevy](https://bevyengine.org/) plugin for integrating with
 //! the Steamworks SDK.
@@ -29,7 +30,7 @@
 //! accessed like any other resource in Bevy. The client implements `Send` and `Sync`
 //! and can be used to make requests via the SDK from any of Bevy's threads.
 //!
-//! The plugin will automatically call `SingleClient::run_callbacks` on
+//! The plugin will automatically call `Client::run_callbacks` on
 //! every tick in the `First` schedule, so there is no need to run it manually.  
 //!
 //! All callbacks are forwarded as `Events` and can be listened to in the a
@@ -56,45 +57,40 @@
 //! }
 //! ```
 
-use std::{
-    ops::Deref,
-    sync::{Arc, Mutex},
-};
+use std::{ops::Deref, sync::Mutex};
 
 use bevy_app::{App, First, Plugin};
 use bevy_ecs::{
     event::EventWriter,
     prelude::{Event, Resource},
-    schedule::*,
-    system::ResMut,
+    schedule::{IntoScheduleConfigs, SystemSet},
+    system::Res,
 };
-use bevy_utils::{synccell::SyncCell, syncunsafecell::SyncUnsafeCell};
 
 // Reexport everything from steamworks except for the clients
-use steamworks::networking_types::NetConnectionStatusChanged;
 pub use steamworks::{
     networking_messages, networking_sockets, networking_types, networking_utils,
     restart_app_if_necessary, stats, AccountId, AppIDs, AppId, Apps, AuthSessionError,
     AuthSessionTicketResponse, AuthSessionValidateError, AuthTicket, Callback, CallbackHandle,
-    ChatMemberStateChange, ClientManager, ComparisonFilter, CreateQueryError, DistanceFilter,
+    CallbackResult, ChatMemberStateChange, ComparisonFilter, CreateQueryError, DistanceFilter,
     DownloadItemResult, FileType, FloatingGamepadTextInputDismissed, FloatingGamepadTextInputMode,
     Friend, FriendFlags, FriendGame, FriendState, Friends, GameId, GameLobbyJoinRequested,
     GameOverlayActivated, GamepadTextInputDismissed, GamepadTextInputLineMode,
     GamepadTextInputMode, Input, InstallInfo, InvalidErrorCode, ItemState, Leaderboard,
     LeaderboardDataRequest, LeaderboardDisplayType, LeaderboardEntry, LeaderboardScoreUploaded,
     LeaderboardSortMethod, LobbyChatUpdate, LobbyDataUpdate, LobbyId, LobbyKey,
-    LobbyKeyTooLongError, LobbyListFilter, LobbyType, Manager, Matchmaking,
-    MicroTxnAuthorizationResponse, NearFilter, NearFilters, Networking, NotificationPosition,
-    NumberFilter, NumberFilters, OverlayToStoreFlag, P2PSessionConnectFail, P2PSessionRequest,
-    PersonaChange, PersonaStateChange, PublishedFileId, PublishedFileVisibility, QueryHandle,
-    QueryResult, QueryResults, RemotePlay, RemotePlayConnected, RemotePlayDisconnected,
-    RemotePlaySession, RemotePlaySessionId, RemoteStorage, SIResult, SResult, SendType, Server,
-    ServerManager, ServerMode, SteamAPIInitError, SteamDeviceFormFactor, SteamError, SteamFile,
-    SteamFileInfo, SteamFileReader, SteamFileWriter, SteamId, SteamServerConnectFailure,
-    SteamServersConnected, SteamServersDisconnected, StringFilter, StringFilterKind, StringFilters,
+    LobbyKeyTooLongError, LobbyListFilter, LobbyType, Matchmaking, MicroTxnAuthorizationResponse,
+    NearFilter, NearFilters, Networking, NotificationPosition, NumberFilter, NumberFilters,
+    OverlayToStoreFlag, P2PSessionConnectFail, P2PSessionRequest, PersonaChange,
+    PersonaStateChange, PublishedFileId, PublishedFileVisibility, QueryHandle, QueryResult,
+    QueryResults, RemotePlay, RemotePlayConnected, RemotePlayDisconnected, RemotePlaySession,
+    RemotePlaySessionId, RemoteStorage, SIResult, SResult, SendType, Server, ServerMode,
+    SteamAPIInitError, SteamDeviceFormFactor, SteamError, SteamFile, SteamFileInfo,
+    SteamFileReader, SteamFileWriter, SteamId, SteamServerConnectFailure, SteamServersConnected,
+    SteamServersDisconnected, StringFilter, StringFilterKind, StringFilters,
     TicketForWebApiResponse, UGCContentDescriptorID, UGCQueryType, UGCStatisticType, UGCType,
     UpdateHandle, UpdateStatus, UpdateWatchHandle, UploadScoreMethod, User, UserAchievementStored,
-    UserList, UserListOrder, UserRestriction, UserStats, UserStatsReceived, UserStatsStored, Utils,
+    UserList, UserListOrder, UserStats, UserStatsReceived, UserStatsStored, Utils,
     ValidateAuthTicketResponse, RESULTS_PER_PAGE, UGC,
 };
 
@@ -102,60 +98,7 @@ pub use steamworks::{
 #[derive(Event, Debug)]
 #[allow(missing_docs)]
 pub enum SteamworksEvent {
-    AuthSessionTicketResponse(AuthSessionTicketResponse),
-    DownloadItemResult(DownloadItemResult),
-    FloatingGamepadTextInputDismissed(FloatingGamepadTextInputDismissed),
-    GameLobbyJoinRequested(GameLobbyJoinRequested),
-    GameOverlayActivated(GameOverlayActivated),
-    GamepadTextInputDismissed(GamepadTextInputDismissed),
-    LobbyChatUpdate(LobbyChatUpdate),
-    LobbyDataUpdate(LobbyDataUpdate),
-    MicroTxnAuthorizationResponse(MicroTxnAuthorizationResponse),
-    NetConnectionStatusChanged(NetConnectionStatusChanged),
-    P2PSessionConnectFail(P2PSessionConnectFail),
-    P2PSessionRequest(P2PSessionRequest),
-    PersonaStateChange(PersonaStateChange),
-    RemotePlayConnected(RemotePlayConnected),
-    RemotePlayDisconnected(RemotePlayDisconnected),
-    SteamServerConnectFailure(SteamServerConnectFailure),
-    SteamServersConnected(SteamServersConnected),
-    SteamServersDisconnected(SteamServersDisconnected),
-    TicketForWebApiResponse(TicketForWebApiResponse),
-    UserAchievementStored(UserAchievementStored),
-    UserStatsReceived(UserStatsReceived),
-    UserStatsStored(UserStatsStored),
-    ValidateAuthTicketResponse(ValidateAuthTicketResponse),
-}
-
-#[derive(Resource)]
-struct SteamworksState {
-    _callbacks: Vec<CallbackHandle>,
-    single_client: SyncCell<steamworks::SingleClient>,
-    pending: Arc<SyncUnsafeCell<Vec<SteamworksEvent>>>,
-}
-
-macro_rules! register_event_callbacks {
-    ($client: ident, $single: ident, $($event_name: ident),+) => {
-        {
-            let pending = Arc::new(SyncUnsafeCell::new(Vec::new()));
-            SteamworksState {
-                _callbacks: vec![
-                    $({
-                        let pending_in = pending.clone();
-                        $client.register_callback::<$event_name, _>(move |evt| {
-                            // SAFETY: The callback is only called during `run_steam_callbacks` which cannot run
-                            // while any of the flush_events systems are running. This cannot alias.
-                            unsafe {
-                                (&mut *pending_in.get()).push(SteamworksEvent::$event_name(evt));
-                            }
-                        })
-                    }),+
-                ],
-                single_client: SyncCell::new($single),
-                pending,
-            }
-        }
-    };
+    CallbackResult(CallbackResult),
 }
 
 /// A Bevy compatible wrapper around [`steamworks::Client`].
@@ -176,7 +119,7 @@ impl Deref for Client {
 
 /// A Bevy [`Plugin`] for adding support for the Steam SDK.
 pub struct SteamworksPlugin {
-    steam: Mutex<Option<(steamworks::Client, steamworks::SingleClient)>>,
+    steam: Mutex<Option<steamworks::Client>>,
 }
 
 impl SteamworksPlugin {
@@ -201,7 +144,7 @@ impl SteamworksPlugin {
 
 impl Plugin for SteamworksPlugin {
     fn build(&self, app: &mut App) {
-        let (client, single) = self
+        let client = self
             .steam
             .lock()
             .unwrap()
@@ -209,33 +152,6 @@ impl Plugin for SteamworksPlugin {
             .expect("The SteamworksPlugin was initialized more than once");
 
         app.insert_resource(Client(client.clone()))
-            .insert_resource(register_event_callbacks!(
-                client,
-                single,
-                AuthSessionTicketResponse,
-                DownloadItemResult,
-                FloatingGamepadTextInputDismissed,
-                GameLobbyJoinRequested,
-                GameOverlayActivated,
-                GamepadTextInputDismissed,
-                LobbyChatUpdate,
-                LobbyDataUpdate,
-                MicroTxnAuthorizationResponse,
-                NetConnectionStatusChanged,
-                P2PSessionConnectFail,
-                P2PSessionRequest,
-                PersonaStateChange,
-                RemotePlayConnected,
-                RemotePlayDisconnected,
-                SteamServerConnectFailure,
-                SteamServersConnected,
-                SteamServersDisconnected,
-                TicketForWebApiResponse,
-                UserAchievementStored,
-                UserStatsReceived,
-                UserStatsStored,
-                ValidateAuthTicketResponse
-            ))
             .add_event::<SteamworksEvent>()
             .configure_sets(First, SteamworksSystem::RunCallbacks)
             .add_systems(
@@ -258,16 +174,8 @@ pub enum SteamworksSystem {
     RunCallbacks,
 }
 
-fn run_steam_callbacks(
-    mut state: ResMut<SteamworksState>,
-    mut output: EventWriter<SteamworksEvent>,
-) {
-    state.single_client.get().run_callbacks();
-    // SAFETY: The callback is only called during `run_steam_callbacks` which cannot run
-    // while any of the flush_events systems are running. The system is registered only once for
-    // the client. This cannot alias.
-    let pending = unsafe { &mut *state.pending.get() };
-    if !pending.is_empty() {
-        output.write_batch(pending.drain(0..));
-    }
+fn run_steam_callbacks(client: Res<Client>, mut output: EventWriter<SteamworksEvent>) {
+    client.process_callbacks(|callback| {
+        output.write(SteamworksEvent::CallbackResult(callback));
+    });
 }
