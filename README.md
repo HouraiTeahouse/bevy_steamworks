@@ -12,7 +12,7 @@ Add the following to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-bevy-steamworks = "0.14"
+bevy-steamworks = "0.15"
 ```
 
 The steamworks crate comes bundled with the redistributable dynamic libraries
@@ -22,7 +22,7 @@ If you wish to enable serde support add the following:
 
 ```toml
 [dependencies]
-bevy-steamworks = { version = "0.14", features = ["serde"] }
+bevy-steamworks = { version = "0.15", features = ["serde"] }
 ```
 
 ## Usage
@@ -51,7 +51,7 @@ and can be used to make requests via the SDK from any of Bevy's threads.
 The plugin will automatically call `SingleClient::run_callbacks` on the Bevy
 every tick in the `First` schedule, so there is no need to run it manually.
 
-All callbacks are forwarded as `Events` and can be listened to in a
+All callbacks are forwarded as `Messages` and can be listened to in a
 Bevy idiomatic way:
 
 ```rust no_run
@@ -76,9 +76,10 @@ fn main() {
 ```
 
 ## Bevy Version Supported
- 
+
 |Bevy Version |bevy\_steamworks|
 |:------------|:---------------|
+|0.17         |0.15            |
 |0.16         |0.14            |
 |0.15         |0.13            |
 |0.14         |0.12            |
