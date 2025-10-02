@@ -31,7 +31,7 @@
 //! and can be used to make requests via the SDK from any of Bevy's threads.
 //!
 //! The plugin will automatically call `Client::run_callbacks` on
-//! every tick in the `First` schedule, so there is no need to run it manually.  
+//! every tick in the `First` schedule, so there is no need to run it manually.
 //!
 //! All callbacks are forwarded as `Events` and can be listened to in the a
 //! Bevy idiomatic way:
@@ -61,8 +61,8 @@ use std::{ops::Deref, sync::Mutex};
 
 use bevy_app::{App, First, Plugin};
 use bevy_ecs::{
-    event::EventWriter,
-    prelude::{Event, Resource},
+    message::Message,
+    prelude::{MessageWriter, Resource},
     schedule::{IntoScheduleConfigs, SystemSet},
     system::Res,
 };
@@ -95,7 +95,7 @@ pub use steamworks::{
 };
 
 /// A Bevy-compatible wrapper around various Steamworks events.
-#[derive(Event, Debug)]
+#[derive(Message, Debug)]
 #[allow(missing_docs)]
 pub enum SteamworksEvent {
     CallbackResult(CallbackResult),
@@ -152,13 +152,13 @@ impl Plugin for SteamworksPlugin {
             .expect("The SteamworksPlugin was initialized more than once");
 
         app.insert_resource(Client(client.clone()))
-            .add_event::<SteamworksEvent>()
+            .add_message::<SteamworksEvent>()
             .configure_sets(First, SteamworksSystem::RunCallbacks)
             .add_systems(
                 First,
                 run_steam_callbacks
                     .in_set(SteamworksSystem::RunCallbacks)
-                    .before(bevy_ecs::event::EventUpdates),
+                    .before(bevy_ecs::message::MessageUpdateSystems),
             );
     }
 }
@@ -174,7 +174,7 @@ pub enum SteamworksSystem {
     RunCallbacks,
 }
 
-fn run_steam_callbacks(client: Res<Client>, mut output: EventWriter<SteamworksEvent>) {
+fn run_steam_callbacks(client: Res<Client>, mut output: MessageWriter<SteamworksEvent>) {
     client.process_callbacks(|callback| {
         output.write(SteamworksEvent::CallbackResult(callback));
     });
