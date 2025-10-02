@@ -57,6 +57,8 @@
 //! }
 //! ```
 
+use std::{ops::Deref, sync::Mutex};
+
 use bevy_app::{App, First, Plugin};
 use bevy_ecs::{
     message::Message,
@@ -64,7 +66,7 @@ use bevy_ecs::{
     schedule::{IntoScheduleConfigs, SystemSet},
     system::Res,
 };
-use std::{ops::Deref, sync::Mutex};
+
 // Reexport everything from steamworks except for the clients
 pub use steamworks::{
     networking_messages, networking_sockets, networking_types, networking_utils,
@@ -154,7 +156,9 @@ impl Plugin for SteamworksPlugin {
             .configure_sets(First, SteamworksSystem::RunCallbacks)
             .add_systems(
                 First,
-                run_steam_callbacks.in_set(SteamworksSystem::RunCallbacks),
+                run_steam_callbacks
+                    .in_set(SteamworksSystem::RunCallbacks)
+                    .before(bevy_ecs::message::MessageUpdateSystems),
             );
     }
 }
