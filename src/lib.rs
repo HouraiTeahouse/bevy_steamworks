@@ -140,14 +140,13 @@ impl SteamworksPlugin {
             steam: Mutex::new(Some(steamworks::Client::init()?)),
         })
     }
+}
 
-    /// Creates a new `SteamworksPlugin` with an existing `steamworks::Client`.
-    /// This is useful when you want to initialize the client separately
-    /// from the plugin.
-    pub fn with(client: steamworks::Client) -> Result<Self, SteamAPIInitError> {
-        Ok(Self {
+impl From<steamworks::Client> for SteamworksPlugin {
+    fn from(client: steamworks::Client) -> Self {
+        Self {
             steam: Mutex::new(Some(client)),
-        })
+        }
     }
 }
 
