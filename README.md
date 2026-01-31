@@ -16,7 +16,7 @@ bevy-steamworks = "0.16"
 ```
 
 The steamworks crate comes bundled with the redistributable dynamic libraries
-of a compatible version of the SDK. Currently it's v158a.
+of a compatible version of the SDK. Currently it's v1.62.
 
 If you wish to enable serde support add the following:
 
