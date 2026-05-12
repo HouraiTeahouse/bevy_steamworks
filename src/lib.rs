@@ -70,7 +70,7 @@ use bevy_ecs::{
 // Reexport everything from steamworks except for the clients
 pub use steamworks::{
     networking_messages, networking_sockets, networking_types, networking_utils,
-    restart_app_if_necessary, stats, AccountId, AppIDs, AppId, Apps, AuthSessionError,
+    restart_app_if_necessary, stats, AccountId, AccountType, AppIDs, AppId, Apps, AuthSessionError,
     AuthSessionTicketResponse, AuthSessionValidateError, AuthTicket, Callback, CallbackHandle,
     CallbackResult, ChatEntryType, ChatMemberStateChange, ChatRoomEnterResponse, ComparisonFilter,
     CreateQueryError, DistanceFilter, DownloadItemResult, FileType,
@@ -91,7 +91,7 @@ pub use steamworks::{
     SteamServersDisconnected, StringFilter, StringFilterKind, StringFilters,
     TicketForWebApiResponse, UGCContentDescriptorID, UGCQueryType, UGCStatisticType, UGCType,
     UpdateHandle, UpdateStatus, UpdateWatchHandle, UploadScoreMethod, User, UserAchievementStored,
-    UserList, UserListOrder, UserStats, UserStatsReceived, UserStatsStored, Utils,
+    Universe, UserList, UserListOrder, UserStats, UserStatsReceived, UserStatsStored, Utils,
     ValidateAuthTicketResponse, RESULTS_PER_PAGE, UGC,
 };
 
