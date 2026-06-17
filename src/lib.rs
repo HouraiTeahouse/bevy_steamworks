@@ -90,9 +90,9 @@ pub use steamworks::{
     SteamFileReader, SteamFileWriter, SteamId, SteamServerConnectFailure, SteamServersConnected,
     SteamServersDisconnected, StringFilter, StringFilterKind, StringFilters,
     TicketForWebApiResponse, UGCContentDescriptorID, UGCQueryType, UGCStatisticType, UGCType,
-    UpdateHandle, UpdateStatus, UpdateWatchHandle, UploadScoreMethod, User, UserAchievementStored,
-    Universe, UserList, UserListOrder, UserStats, UserStatsReceived, UserStatsStored, Utils,
-    ValidateAuthTicketResponse, RESULTS_PER_PAGE, UGC,
+    Universe, UpdateHandle, UpdateStatus, UpdateWatchHandle, UploadScoreMethod, User,
+    UserAchievementStored, UserList, UserListOrder, UserStats, UserStatsReceived, UserStatsStored,
+    Utils, ValidateAuthTicketResponse, RESULTS_PER_PAGE, UGC,
 };
 
 /// A Bevy-compatible wrapper around various Steamworks events.
