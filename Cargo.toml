@@ -13,7 +13,7 @@ default = []
 serde = ["steamworks/serde"]
 
 [dependencies]
-bevy_app = { version = "0.18", default-features = false }
+bevy_app = { version = "0.19", default-features = false }
 bevy_ecs = { version = "0.18", default-features = false }
 steamworks = "0.13.0"
 
