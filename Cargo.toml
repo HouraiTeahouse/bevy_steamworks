@@ -18,6 +18,4 @@ bevy_ecs = { version = "0.19", default-features = false }
 steamworks = "0.13.1"
 
 [dev-dependencies]
-# `ui_picking` enables the UI picking backend so that `Pointer<..>` events (used by
-# the observers in `examples/lobby.rs`) fire on UI nodes. It is not in Bevy's defaults.
-bevy = { version = "0.19", features = ["ui_picking"] }
+bevy = "0.19"
