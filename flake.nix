@@ -1,5 +1,5 @@
 {
-  description = "A flake using Oxalica's rust-overlay wrapped with bevy-flake.";
+  description = "bevy-steamworks development (bevy-flake + rust-overlay)";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
@@ -33,12 +33,17 @@
           inherit packages formatter;
 
           devShells.default = pkgs.mkShell {
-            name = "bevy-flake-rust-overlay";
-            packages = [
-              packages.rust-toolchain.develop
-              packages.dioxus-cli.develop
-              # packages.bevy-cli.develop
-            ];
+            name = "bevy-steamworks";
+            packages =
+              [
+                packages.rust-toolchain.develop
+                pkgs.pkg-config
+                pkgs.cmake
+              ]
+              ++ pkgs.lib.optionals pkgs.stdenv.hostPlatform.isLinux [
+                pkgs.vulkan-tools
+                pkgs.steam-run
+              ];
           };
         };
 
@@ -52,8 +57,6 @@
           src = builtins.path {
             name = "src";
             path = ./.;
-
-            # Ignore files that aren't needed in compilation of Bevy project.
             filter =
               path: type:
               !(builtins.elem (baseNameOf path) [
@@ -64,10 +67,7 @@
 
           rustToolchain =
             targets:
-            let
-              channel = "stable"; # For nightly, use "nightly".
-            in
-            pkgs.rust-bin.${channel}.latest.default.override {
+            pkgs.rust-bin.stable.latest.default.override {
               inherit targets;
               extensions = [
                 "rust-src"
